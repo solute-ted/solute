@@ -13,8 +13,7 @@
             --text-muted: #888;
         }
 
-        /* 기본 레이아웃 유지 */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         body { 
             background-color: var(--bg-color);
@@ -23,7 +22,17 @@
             overflow-x: hidden;
         }
 
-        /* 헤더 스타일 고정 */
+        /* 로딩 오버레이 */
+        #loading-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #fcfcfc; display: flex; justify-content: center; align-items: center;
+            z-index: 99999; opacity: 0; visibility: hidden;
+            transition: opacity 0.2s ease-in-out;
+            font-family: 'Playfair Display', serif; letter-spacing: 3px;
+        }
+        #loading-overlay.is-loading { opacity: 1; visibility: visible; }
+
+        /* 헤더 스타일 */
         header {
             position: fixed; top: 0; left: 0; width: 100%;
             display: flex; justify-content: space-between; align-items: center;
@@ -32,13 +41,101 @@
         }
 
         .logo { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 600; letter-spacing: 3px; text-decoration: none; color: var(--primary-dark); }
-        nav { display: flex; gap: 40px; }
-        nav a { text-decoration: none; color: var(--primary-dark); font-size: 0.85rem; font-weight: 500; }
+        
+        nav { display: flex; align-items: center; position: relative; }
+        #cart-link { position: relative; padding-bottom: 10px; margin-bottom: -10px; text-decoration: none; color: var(--primary-dark); margin-left: 40px; font-size: 0.85rem; font-weight: 500; }
+        nav a:not(#cart-link) { text-decoration: none; color: var(--primary-dark); font-size: 0.85rem; font-weight: 500; margin-left: 40px; }
 
-        .shop-container { padding: 160px 60px 80px; min-height: 100vh; }
+        /* --- [공통] 미니 장바구니 팝업 CSS (정밀 조정 완료) --- */
+        .mini-cart {
+            position: absolute;
+            top: 40px; right: 0;
+            width: 280px;
+            background: #fff;
+            border: 1px solid #eee;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+            padding: 20px 0; 
+            z-index: 10001;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        .mini-cart.active { opacity: 1; visibility: visible; transform: translateY(0); }
+
+        .mini-cart-header { 
+            margin: 0 20px 15px 20px; 
+            font-size: 0.7rem; 
+            letter-spacing: 1px; 
+            color: #aaa; 
+            border-bottom: 1px solid #f5f5f5; 
+            padding-bottom: 10px; 
+            text-transform: uppercase; 
+            text-align: left;
+        }
+
+        .mini-item { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; /* 이미지-텍스트 사이 간격을 촘촘하게 조정 */
+            margin: 0 20px 15px 20px; 
+            text-align: left;
+        }
+
+        .mini-img { width: 50px; height: 50px; background: #eee; border-radius: 2px; flex-shrink: 0; }
+        
+        .mini-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .mini-info h4 { 
+            font-size: 0.85rem; 
+            margin-bottom: 2px; 
+            font-weight: 500; 
+            color: var(--primary-dark); 
+            line-height: 1.2;
+        }
+
+        .mini-info p { 
+            font-size: 0.75rem; 
+            color: #888; 
+            line-height: 1.2;
+        }
+
+        .go-cart-btn { 
+            display: block; 
+            width: 240px !important; 
+            margin: 15px auto 0 auto !important; 
+            padding: 14px 0; 
+            background: var(--primary-dark); 
+            color: #fff !important; 
+            text-align: center; 
+            font-size: 0.75rem; 
+            text-decoration: none; 
+            letter-spacing: 1px;
+            border-radius: 2px;
+            box-sizing: border-box !important;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .go-cart-btn:hover { background: #333; }
+
+        #mini-cart-list p {
+            text-align: center;
+            padding: 10px 0 20px 0;
+            font-size: 0.75rem;
+            color: #ccc;
+        }
+
+        /* 샵 컨테이너 */
+        .shop-container { padding: 160px 60px 80px; min-height: 100vh; transition: opacity 0.3s ease; }
         h2 { font-family: 'Playfair Display', serif; font-size: 3.5rem; margin-bottom: 30px; }
 
-        /* 필터 버튼 유지 */
+        /* 필터 버튼 */
         .filter-container { display: flex; gap: 30px; margin-bottom: 50px; }
         .filter-btn {
             background: none; border: none; cursor: pointer;
@@ -47,7 +144,7 @@
         }
         .filter-btn.active { color: var(--primary-dark); border-bottom: 2px solid var(--primary-dark); }
 
-        /* 상품 그리드 및 호버 모션 유지 */
+        /* 상품 그리드 */
         .product-grid { 
             display: grid; 
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
@@ -55,50 +152,48 @@
         }
 
         .product-item { 
-            text-decoration: none; 
-            color: inherit; 
-            display: block; 
-            transition: transform 0.4s ease, opacity 0.3s ease; 
-            will-change: transform;
+            text-decoration: none; color: inherit; display: block; 
+            transition: transform 0.4s ease; will-change: transform; cursor: pointer;
         }
-
-        /* [호버 모션] 위로 살짝 뜨는 효과 */
-        .product-item:hover {
-            transform: translateY(-10px);
-        }
+        .product-item:hover { transform: translateY(-10px); }
         
         .product-img { 
             width: 100%; aspect-ratio: 1 / 1.2; 
             background: #f0f0f0; margin-bottom: 20px; border-radius: 2px;
             transition: box-shadow 0.4s ease;
         }
-
-        .product-item:hover .product-img {
-            box-shadow: 0 15px 30px rgba(0,0,0,0.08);
-        }
+        .product-item:hover .product-img { box-shadow: 0 15px 30px rgba(0,0,0,0.08); }
 
         .product-info h3 { font-size: 1.1rem; margin-bottom: 8px; font-weight: 500; }
         .product-info p { color: var(--text-muted); font-size: 0.9rem; }
 
-        /* 필터링용 숨김 클래스 */
         .item-hidden { display: none !important; }
 
         @media (max-width: 768px) {
             header { padding: 30px 25px; }
-            nav { gap: 20px; }
+            nav a, #cart-link { margin-left: 20px; }
             .shop-container { padding: 120px 25px 40px; }
             h2 { font-size: 2.2rem; }
-            .product-item:hover { transform: none; } /* 모바일 터치 시 오작동 방지 */
+            .mini-cart { width: 250px; right: -10px; }
+            .go-cart-btn { width: 210px !important; }
         }
     </style>
 </head>
 <body>
 
+    <div id="loading-overlay">SOLUTE</div>
+
     <header>
         <a href="./index.html" class="logo">Solute</a>
         <nav>
             <a href="./shop.html">SHOP</a>
-            <a href="#">CART</a>
+            <a href="./cart.html" id="cart-link">CART<span id="cart-count"></span></a>
+
+            <div id="mini-cart" class="mini-cart">
+                <div class="mini-cart-header">RECENTLY ADDED</div>
+                <div id="mini-cart-list"></div>
+                <a href="./cart.html" class="go-cart-btn">VIEW ALL CART</a>
+            </div>
         </nav>
     </header>
 
@@ -112,19 +207,19 @@
         </div>
         
         <div id="productGrid" class="product-grid">
-            <div class="product-item" data-category="acrylic">
-                <div class="product-img"></div>
+            <div class="product-item" data-category="acrylic" onclick="goToDetail('ab1')">
+                <div class="product-img" style="background-color: #dbe2e8;"></div>
                 <div class="product-info"><h3>Acrylic Base</h3><p>₩159,000</p></div>
             </div>
-            <div class="product-item" data-category="acrylic">
+            <div class="product-item" data-category="acrylic" onclick="goToDetail('al1')">
                 <div class="product-img" style="background-color: #e8eef2;"></div>
                 <div class="product-info"><h3>Acrylic Layer</h3><p>₩139,000</p></div>
             </div>
-            <div class="product-item" data-category="wood">
+            <div class="product-item" data-category="wood" onclick="goToDetail('wb1')">
                 <div class="product-img" style="background-color: #f2e9e1;"></div>
                 <div class="product-info"><h3>Wood Base</h3><p>₩149,000</p></div>
             </div>
-            <div class="product-item" data-category="wood">
+            <div class="product-item" data-category="wood" onclick="goToDetail('wl1')">
                 <div class="product-img" style="background-color: #ece0d1;"></div>
                 <div class="product-info"><h3>Wood Layer</h3><p>₩129,000</p></div>
             </div>
@@ -132,6 +227,77 @@
     </div>
 
     <script>
+        let miniCartTimer;
+
+        function updateCartStatus() {
+            const cart = JSON.parse(localStorage.getItem('solute_cart')) || [];
+            const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const countElement = document.getElementById('cart-count');
+            if (countElement) {
+                countElement.innerText = totalCount > 0 ? `(${totalCount})` : "";
+            }
+
+            const miniCartList = document.getElementById('mini-cart-list');
+            if (miniCartList) {
+                if (cart.length > 0) {
+                    const recentItems = [...cart].reverse().slice(0, 3);
+                    miniCartList.innerHTML = recentItems.map(item => `
+                        <div class="mini-item">
+                            <div class="mini-img" style="background-color: ${item.color || '#eee'}"></div>
+                            <div class="mini-info">
+                                <h4>${item.name}</h4>
+                                <p>${item.price} (Qty: ${item.quantity})</p>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    miniCartList.innerHTML = '<p>장바구니가 비어있습니다.</p>';
+                }
+            }
+        }
+
+        function initCartHoverEvents() {
+            const cartLink = document.getElementById('cart-link');
+            const miniCart = document.getElementById('mini-cart');
+
+            if (!cartLink || !miniCart) return;
+
+            cartLink.addEventListener('mouseenter', () => {
+                clearTimeout(miniCartTimer);
+                updateCartStatus();
+                miniCart.classList.add('active');
+            });
+
+            cartLink.addEventListener('mouseleave', () => {
+                miniCartTimer = setTimeout(() => {
+                    miniCart.classList.remove('active');
+                }, 500);
+            });
+
+            miniCart.addEventListener('mouseenter', () => {
+                clearTimeout(miniCartTimer);
+            });
+
+            miniCart.addEventListener('mouseleave', () => {
+                miniCartTimer = setTimeout(() => {
+                    miniCart.classList.remove('active');
+                }, 500);
+            });
+        }
+
+        function goToDetail(id) {
+            const overlay = document.getElementById('loading-overlay');
+            const shopContainer = document.querySelector('.shop-container');
+            const targetUrl = `./product-detail.html?id=${id}`;
+
+            if (shopContainer) shopContainer.style.opacity = '0';
+            if (overlay) overlay.classList.add('is-loading');
+
+            setTimeout(() => {
+                window.location.href = targetUrl;
+            }, 400);
+        }
+
         function filterProduct(category) {
             const items = document.querySelectorAll('.product-item');
             const btns = document.querySelectorAll('.filter-btn');
@@ -150,11 +316,25 @@
             });
         }
 
-        window.onload = function() {
+        window.addEventListener('load', () => {
+            updateCartStatus();
+            initCartHoverEvents();
+            
             const urlParams = new URLSearchParams(window.location.search);
             const initialFilter = urlParams.get('filter') || 'all';
             filterProduct(initialFilter.toLowerCase());
-        };
+            
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) overlay.classList.remove('is-loading');
+        });
+
+        window.addEventListener('pageshow', (event) => {
+            updateCartStatus();
+            if (event.persisted) {
+                const overlay = document.getElementById('loading-overlay');
+                if (overlay) overlay.classList.remove('is-loading');
+            }
+        });
     </script>
 </body>
 </html>

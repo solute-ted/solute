@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solute | Cart</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;500&family=Playfair+Display:ital,wght@0,600;1,600&display=swap');
+        
+        :root { --bg-color: #fcfcfc; --primary-dark: #1a1a1a; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: var(--bg-color); font-family: 'Noto Sans KR', sans-serif; }
+
+        header { position: fixed; top: 0; width: 100%; display: flex; justify-content: space-between; padding: 40px 60px; background: var(--bg-color); z-index: 100; }
+        .logo { font-family: 'Playfair Display', serif; font-size: 1.8rem; text-decoration: none; color: #000; font-weight: 600; letter-spacing: 3px; }
+
+        .cart-container { padding: 180px 10% 100px; max-width: 1200px; margin: 0 auto; min-height: 100vh; }
+        h2 { font-family: 'Playfair Display', serif; font-size: 3rem; margin-bottom: 50px; }
+
+        .cart-item { display: flex; align-items: center; padding: 30px 0; border-bottom: 1px solid #eee; gap: 30px; }
+        .cart-img { width: 120px; aspect-ratio: 1/1; background: #eee; }
+        .cart-info { flex: 2; }
+        .cart-info h3 { font-size: 1.1rem; margin-bottom: 5px; }
+        .cart-info p { color: #888; font-size: 0.9rem; }
+        
+        .cart-qty { flex: 1; text-align: center; }
+        .cart-price { flex: 1; text-align: right; font-weight: 500; }
+        .remove-btn { cursor: pointer; color: #ccc; font-size: 0.8rem; text-decoration: underline; margin-top: 10px; display: inline-block; }
+
+        .cart-summary { margin-top: 50px; border-top: 2px solid #1a1a1a; padding-top: 30px; text-align: right; }
+        .total-price { font-size: 2rem; font-family: 'Playfair Display', serif; margin-bottom: 30px; }
+        .checkout-btn { padding: 20px 60px; background: #1a1a1a; color: #fff; text-decoration: none; letter-spacing: 2px; }
+        
+        .empty-msg { text-align: center; padding: 100px 0; color: #aaa; }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="index.html" class="logo">Solute</a>
+        <nav><a href="shop.html" style="text-decoration:none; color:#000; font-size:0.9rem;">CONTINUE SHOPPING</a></nav>
+    </header>
+
+    <div class="cart-container">
+        <h2>Your Cart</h2>
+        <div id="cartList">
+            </div>
+        <div class="cart-summary" id="cartSummary">
+            <div class="total-price">Total: <span id="totalAmount">₩0</span></div>
+            <a href="#" class="checkout-btn">CHECK OUT</a>
+        </div>
+    </div>
+
+    <script>
+        function renderCart() {
+            const cart = JSON.parse(localStorage.getItem('solute_cart')) || [];
+            const listContainer = document.getElementById('cartList');
+            const summary = document.getElementById('cartSummary');
+            let total = 0;
+
+            if (cart.length === 0) {
+                listContainer.innerHTML = '<div class="empty-msg">Your cart is empty.</div>';
+                summary.style.display = 'none';
+                return;
+            }
+
+            listContainer.innerHTML = cart.map((item, index) => {
+                const priceNum = parseInt(item.price.replace(/[^0-9]/g, ''));
+                total += priceNum * item.quantity;
+
+                return `
+                    <div class="cart-item">
+                        <div class="cart-img" style="background-color: ${item.color}"></div>
+                        <div class="cart-info">
+                            <h3>${item.name}</h3>
+                            <p>${item.code}</p>
+                            <span class="remove-btn" onclick="removeItem(${index})">Remove</span>
+                        </div>
+                        <div class="cart-qty">Qty: ${item.quantity}</div>
+                        <div class="cart-price">${item.price}</div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('totalAmount').innerText = '₩' + total.toLocaleString();
+            summary.style.display = 'block';
+        }
+
+        function removeItem(index) {
+            let cart = JSON.parse(localStorage.getItem('solute_cart')) || [];
+            cart.splice(index, 1);
+            localStorage.setItem('solute_cart', JSON.stringify(cart));
+            renderCart();
+        }
+
+        window.onload = renderCart;
+    </script>
+</body>
+</html>
