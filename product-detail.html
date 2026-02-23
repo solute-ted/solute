@@ -23,6 +23,15 @@
             
             opacity: 0;
             transition: all 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
+            /* [추가] 배경과 자연스럽게 섞이도록 설정 */
+            mix-blend-mode: multiply; /* 흰색 배경인 경우 주변과 완벽히 동화됨 */
+            
+            /* [추가] 이미지 경계선을 아주 미세하게 흐리게 처리 (블럭 현상 방지) */
+            mask-image: radial-gradient(circle, black 70%, rgba(0,0,0,0) 100%);
+            -webkit-mask-image: radial-gradient(circle, black 70%, rgba(0,0,0,0) 100%);
+
+            /* 모바일에서 렌더링 성능 향상 */
+            will-change: transform, opacity;
         }
 
         /* 이미지가 로드되었을 때 나타나는 효과 */
@@ -33,9 +42,14 @@
 
         /* 상세페이지 레이아웃 모바일 대응 */
         @media (max-width: 768px) {
+            .product-detail-container {
+                padding: 20px;
+                overflow-x: hidden; /* 가로 스크롤 방지 */
+            }
+            
             #mainImg {
-                min-width: 100%;
-                margin-bottom: 40px;
+                background-size: 140% !important; /* 모바일 화면에 맞춰 크기 재조절 */
+                margin-top: -50px; /* 로고와 겹치지 않게 위치 조정 */
             }
         }
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;500&family=Playfair+Display:ital,wght@0,600;1,600&display=swap');
@@ -253,7 +267,22 @@
             mainImgElem.classList.add('loaded');
             document.title = `Solute | ${currentProduct.name}`;
         }
-
+        function loadProductImage(currentProduct) {
+            const mainImgElem = document.getElementById('mainImg');
+            
+            // 1. 먼저 투명하게 만듦
+            mainImgElem.style.opacity = '0';
+            
+            const img = new Image();
+            img.src = currentProduct.img;
+            
+            // 2. 이미지가 메모리에 완전히 로드된 후 실행
+            img.onload = function() {
+                mainImgElem.style.backgroundImage = `url('${currentProduct.img}')`;
+                // 3. 부드럽게 나타나게 함 (transition 효과와 시너지)
+                mainImgElem.style.opacity = '1';
+            };
+        }
         function updateCartStatus() {
             const cart = JSON.parse(localStorage.getItem('solute_cart')) || [];
             const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
