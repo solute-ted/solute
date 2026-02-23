@@ -167,19 +167,14 @@
     <script>
         const overlay = document.getElementById('loading-overlay');
 
-        // [핵심] 페이지 전환 함수
+        // 1. [메뉴 클릭용] 부드러운 1초 지연 함수
         function handleTransition(url) {
-            // 1. 먼저 로딩 화면을 띄웁니다.
             overlay.classList.add('is-loading');
-
-            // 2. 브라우저가 로딩 화면을 그릴 시간을 준 뒤(requestAnimationFrame),
-            // 1초(1000ms) 뒤에 페이지를 이동시킵니다.
             setTimeout(() => {
                 window.location.href = url;
             }, 1000); 
         }
 
-        // 1. 상단 메뉴(SHOP 등) 클릭 시
         document.querySelectorAll('nav a').forEach(link => {
             link.addEventListener('click', function(e) {
                 const targetUrl = this.getAttribute('href');
@@ -190,19 +185,22 @@
             });
         });
 
-        // 2. Spline 레이어 클릭 감지 (가장 중요)
-        // 배포 환경에서는 Spline 내부 클릭을 직접 가로채기 어려우므로, 
-        // 브라우저의 '포커스 아웃'과 '페이지 떠남'을 감지하여 로딩을 즉시 띄웁니다.
-        window.addEventListener('blur', () => {
-            overlay.classList.add('is-loading');
-        });
-
+        // 2. [Spline 레이어 클릭용] 페이지를 떠나기 직전 강제 홀딩
+        // 레이어를 클릭해 이동이 시작되면 이 이벤트가 즉시 실행됩니다.
         window.addEventListener('beforeunload', () => {
+            // 즉시 로딩 오버레이를 켭니다.
             overlay.classList.add('is-loading');
+            
+            // [중요] 브라우저가 다음 페이지를 그리기 전에 1초간 '동기적'으로 대기합니다.
+            // 이 루프가 도는 동안 브라우저는 현재 화면(로딩창)을 유지하려 노력합니다.
+            const start = Date.now();
+            while (Date.now() - start < 1000) {
+                // 1초 동안 아무것도 안 하고 대기 (로딩 화면이 보일 시간 확보)
+            }
         });
 
-        // 3. 페이지가 로드되거나 돌아왔을 때 로딩 해제
-        window.addEventListener('pageshow', (event) => {
+        // 3. 페이지가 다시 나타날 때 로딩 제거
+        window.addEventListener('pageshow', () => {
             overlay.classList.remove('is-loading');
         });
     </script>
