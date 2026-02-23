@@ -34,11 +34,12 @@
         .logo { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 600; letter-spacing: 3px; text-decoration: none; color: var(--primary-dark); }
         
         nav { display: flex; align-items: center; position: relative; }
-        /* 호버 영역 감지를 위한 스타일 */
         #cart-link { position: relative; padding-bottom: 10px; margin-bottom: -10px; text-decoration: none; color: var(--primary-dark); margin-left: 40px; font-size: 0.85rem; font-weight: 500; }
         nav a:not(#cart-link) { text-decoration: none; color: var(--primary-dark); font-size: 0.85rem; font-weight: 500; margin-left: 40px; }
 
         /* --- Mini Cart Popup --- */
+        #mini-cart-list p { text-align: center; padding: 10px 0 20px 0; }
+        
         .mini-cart {
             position: absolute;
             top: 40px; right: 0;
@@ -46,7 +47,6 @@
             background: #fff;
             border: 1px solid #eee;
             box-shadow: 0 15px 40px rgba(0,0,0,0.1);
-            /* 상하 패딩만 주고 좌우는 0으로 설정 */
             padding: 20px 0; 
             z-index: 10001;
             opacity: 0;
@@ -55,14 +55,10 @@
             transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
         }
 
-        .mini-cart.active {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
+        .mini-cart.active { opacity: 1; visibility: visible; transform: translateY(0); }
 
         .mini-cart-header {
-            margin: 0 20px 15px 20px; /* 좌우 20px 마진으로 위치 조정 */
+            margin: 0 20px 15px 20px;
             font-size: 0.7rem; 
             letter-spacing: 1px; 
             color: #aaa;
@@ -71,23 +67,15 @@
             text-transform: uppercase;
         }
 
-        .mini-item { 
-            display: flex; 
-            align-items: center; 
-            gap: 15px; 
-            margin: 0 20px 15px 20px; /* 좌우 20px 마진으로 안쪽으로 밀어줌 */
-        }
-        .mini-img { width: 50px; height: 50px; background: #eee; border-radius: 2px; flex-shrink: 0; }
+        .mini-item { display: flex; align-items: center; gap: 15px; margin: 0 20px 15px 20px; }
+        .mini-img { width: 50px; height: 50px; background: #eee; border-radius: 2px; flex-shrink: 0; background-size: contain; background-position: center; background-repeat: no-repeat; }
         .mini-info h4 { font-size: 0.85rem; margin-bottom: 2px; font-weight: 500; }
         .mini-info p { font-size: 0.75rem; color: #888; }
 
         .go-cart-btn {
             display: block;
-            /* 팝업 전체 너비(280px)에서 양옆 20px씩 뺀 고정 너비 계산 */
             width: 240px !important; 
-            /* 좌우 마진 auto로 완벽한 중앙 정렬 강제 */
             margin: 15px auto 0 auto !important; 
-            
             padding: 14px 0;
             background: var(--primary-dark);
             color: #fff !important;
@@ -96,12 +84,7 @@
             font-size: 0.75rem;
             letter-spacing: 1px;
             border-radius: 2px;
-            box-sizing: border-box !important;
             cursor: pointer;
-        }
-
-        .go-cart-btn:hover {
-            background: #333;
         }
 
         /* --- Detail Layout --- */
@@ -110,7 +93,26 @@
             max-width: 1400px; margin: 0 auto; align-items: flex-start;
         }
 
-        .detail-img { flex: 1.2; aspect-ratio: 1 / 1.2; background-color: #f0f0f0; border-radius: 2px; }
+        /* [수정] PNG 이미지가 돋보이도록 개선된 이미지 영역 */
+        .detail-img { 
+            flex: 1.2; 
+            aspect-ratio: 1 / 1.1; 
+            background-color: #f5f5f5; 
+            border-radius: 2px; 
+            overflow: hidden;
+            background-repeat: no-repeat;
+            /* 샵 페이지 설정을 상세페이지 크기에 맞춰 계승 */
+            background-size: 300%; 
+            background-position: 55% center; 
+            opacity: 0; /* 애니메이션 시작 전 투명 */
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .detail-img.loaded {
+            opacity: 1;
+            animation: fadeInUp 1s ease forwards;
+        }
+
         .detail-info { flex: 1; position: sticky; top: 180px; }
 
         #productCode { font-size: 0.8rem; letter-spacing: 2px; color: #aaa; margin-bottom: 15px; display: block; }
@@ -137,6 +139,11 @@
         }
         #loading-overlay.fade-out { opacity: 0; visibility: hidden; }
 
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         @media (max-width: 768px) { 
             header { padding: 30px 25px; }
             nav a, #cart-link { margin-left: 20px; }
@@ -158,8 +165,7 @@
 
             <div id="mini-cart" class="mini-cart">
                 <div class="mini-cart-header">RECENTLY ADDED</div>
-                <div id="mini-cart-list">
-                    </div>
+                <div id="mini-cart-list"></div>
                 <a href="./cart.html" class="go-cart-btn">VIEW ALL CART</a>
             </div>
         </nav>
@@ -180,8 +186,9 @@
     </main>
 
     <script>
+        // [수정] 상품 데이터에 이미지 경로(img) 추가
         const products = {
-            "ab1": { name: "Acrylic Base", price: "₩159,000", color: "#dbe2e8", code: "AB1" },
+            "ab1": { name: "Acrylic Base", price: "₩159,000", color: "#f5f5f5", code: "AB1", img: "./assets/images/Acrylic Base.png" },
             "al1": { name: "Acrylic Layer", price: "₩139,000", color: "#e8eef2", code: "AL1" },
             "wb1": { name: "Wood Base", price: "₩149,000", color: "#f2e9e1", code: "WB1" },
             "wl1": { name: "Wood Layer", price: "₩129,000", color: "#ece0d1", code: "WL1" }
@@ -190,38 +197,45 @@
         const params = new URLSearchParams(window.location.search);
         const id = params.get('id');
         let currentProduct = null;
-        let miniCartTimer; // 타이머 변수
+        let miniCartTimer;
 
         if (id && products[id]) {
             currentProduct = products[id];
             document.getElementById('productCode').innerText = currentProduct.code;
             document.getElementById('productName').innerText = currentProduct.name;
             document.getElementById('productPrice').innerText = currentProduct.price;
-            document.getElementById('mainImg').style.backgroundColor = currentProduct.color;
+            
+            const mainImgElem = document.getElementById('mainImg');
+            
+            // [핵심] PNG 이미지가 있는 경우 배경 이미지로 세팅
+            if (currentProduct.img) {
+                mainImgElem.style.backgroundImage = `url('${currentProduct.img}')`;
+                mainImgElem.style.backgroundColor = currentProduct.color;
+            } else {
+                mainImgElem.style.backgroundColor = currentProduct.color;
+            }
+            
+            mainImgElem.classList.add('loaded'); // 애니메이션 실행
             document.title = `Solute | ${currentProduct.name}`;
         } else {
             window.location.href = 'shop.html';
         }
 
-        // 1. 장바구니 리스트 및 카운트 업데이트 함수
         function updateCartStatus() {
             const cart = JSON.parse(localStorage.getItem('solute_cart')) || [];
-            
-            // 카운트 업데이트
             const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
             const countElement = document.getElementById('cart-count');
             if (countElement) {
                 countElement.innerText = totalCount > 0 ? `(${totalCount})` : "";
             }
 
-            // 미니 카트 리스트 갱신
             const miniCartList = document.getElementById('mini-cart-list');
             if (miniCartList) {
                 if (cart.length > 0) {
                     const recentItems = [...cart].reverse().slice(0, 3);
                     miniCartList.innerHTML = recentItems.map(item => `
                         <div class="mini-item">
-                            <div class="mini-img" style="background-color: ${item.color}"></div>
+                            <div class="mini-img" style="background-color: ${item.color}; background-image: url('${item.img || ''}')"></div>
                             <div class="mini-info">
                                 <h4>${item.name}</h4>
                                 <p>${item.price} (Qty: ${item.quantity})</p>
@@ -234,80 +248,58 @@
             }
         }
 
-        // 2. [추가] 호버 이벤트 초기화 함수
         function initCartHoverEvents() {
             const cartLink = document.getElementById('cart-link');
             const miniCart = document.getElementById('mini-cart');
-
             if (!cartLink || !miniCart) return;
 
-            // CART 링크 호버
             cartLink.addEventListener('mouseenter', () => {
                 clearTimeout(miniCartTimer);
                 updateCartStatus();
                 miniCart.classList.add('active');
             });
-
             cartLink.addEventListener('mouseleave', () => {
-                miniCartTimer = setTimeout(() => {
-                    miniCart.classList.remove('active');
-                }, 500); // 0.5초 뒤 삭제
+                miniCartTimer = setTimeout(() => { miniCart.classList.remove('active'); }, 500);
             });
-
-            // 팝업창 내부 호버
-            miniCart.addEventListener('mouseenter', () => {
-                clearTimeout(miniCartTimer);
-            });
-
+            miniCart.addEventListener('mouseenter', () => { clearTimeout(miniCartTimer); });
             miniCart.addEventListener('mouseleave', () => {
-                miniCartTimer = setTimeout(() => {
-                    miniCart.classList.remove('active');
-                }, 500);
+                miniCartTimer = setTimeout(() => { miniCart.classList.remove('active'); }, 500);
             });
         }
 
-        // 3. 상품 담기 및 팝업 자동 노출
         function addToCart() {
             if (!currentProduct) return;
-
             const itemToAdd = {
                 id: id,
                 name: currentProduct.name,
                 price: currentProduct.price,
                 code: currentProduct.code,
                 color: currentProduct.color,
+                img: currentProduct.img || "", // 이미지 경로 추가 저장
                 quantity: 1
             };
 
             let cart = JSON.parse(localStorage.getItem('solute_cart')) || [];
             const existingIndex = cart.findIndex(item => item.id === id);
-            
-            if (existingIndex > -1) {
-                cart[existingIndex].quantity += 1;
-            } else {
-                cart.push(itemToAdd);
-            }
+            if (existingIndex > -1) { cart[existingIndex].quantity += 1; } 
+            else { cart.push(itemToAdd); }
 
             localStorage.setItem('solute_cart', JSON.stringify(cart));
-            
             updateCartStatus(); 
 
-            // 담았을 때 팝업 노출 로직
             const miniCart = document.getElementById('mini-cart');
             miniCart.classList.add('active');
-
             clearTimeout(miniCartTimer);
             miniCartTimer = setTimeout(() => {
-                // 마우스가 현재 팝업 위에 있지 않을 때만 닫기
                 if (!miniCart.matches(':hover') && !document.getElementById('cart-link').matches(':hover')) {
                     miniCart.classList.remove('active');
                 }
-            }, 3000); // 3초 유지
+            }, 3000);
         }
 
         window.addEventListener('load', () => {
             updateCartStatus();
-            initCartHoverEvents(); // 호버 기능 초기화
+            initCartHoverEvents();
             setTimeout(() => {
                 document.getElementById('loading-overlay').classList.add('fade-out');
             }, 300);

@@ -15,6 +15,33 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
+        .product-img {
+            width: 100% !important;
+            aspect-ratio: 1 / 1.2 !important;
+            margin-bottom: 20px !important;
+            border-radius: 2px !important;
+            background-color: #f5f5f5 !important; /* 배경색 */
+
+            /* 핵심 설정: 마우스 대기 전에도 보여야 함 */
+            display: block !important;
+            opacity: 1 !important; 
+            visibility: visible !important;
+
+            /* 이미지 중복 방지 및 중앙 정렬 */
+            background-repeat: no-repeat !important;
+            background-position: 55% center !important;
+            background-size: 230% !important; /* 이미지 크기 조절 */
+            
+            transition: all 0.5s ease !important;
+        }
+
+        /* 마우스 올렸을 때 중복 방지 유지 및 크기만 변경 */
+        .product-item:hover .product-img {
+            background-size: 280% !important;
+            background-repeat: no-repeat !important;
+            background-color: #efefef !important;
+        }
+
         body { 
             background-color: var(--bg-color);
             font-family: 'Noto Sans KR', sans-serif;
@@ -208,7 +235,8 @@
         
         <div id="productGrid" class="product-grid">
             <div class="product-item" data-category="acrylic" onclick="goToDetail('ab1')">
-                <div class="product-img" style="background-color: #dbe2e8;"></div>
+                <div class="product-img" style="background-color: #f5f5f5; background-image: url('./assets/images/Acrylic Base.png');">
+            </div>
                 <div class="product-info"><h3>Acrylic Base</h3><p>₩159,000</p></div>
             </div>
             <div class="product-item" data-category="acrylic" onclick="goToDetail('al1')">
@@ -328,11 +356,24 @@
             if (overlay) overlay.classList.remove('is-loading');
         });
 
+        // 뒤로가기 시 하얀 화면 방지 및 상태 초기화
         window.addEventListener('pageshow', (event) => {
+            const overlay = document.getElementById('loading-overlay');
+            const shopContainer = document.querySelector('.shop-container');
+
+            // 1. 장바구니 상태 최신화
             updateCartStatus();
-            if (event.persisted) {
-                const overlay = document.getElementById('loading-overlay');
-                if (overlay) overlay.classList.remove('is-loading');
+
+            // 2. 뒤로가기로 왔을 때 (event.persisted가 true인 경우 포함)
+            // 오버레이를 강제로 숨기고 컨테이너 투명도를 복구합니다.
+            if (overlay) {
+                overlay.classList.remove('is-loading');
+                overlay.style.opacity = '0';
+                overlay.style.visibility = 'hidden';
+            }
+            
+            if (shopContainer) {
+                shopContainer.style.opacity = '1';
             }
         });
     </script>
