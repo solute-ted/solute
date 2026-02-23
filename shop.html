@@ -15,31 +15,32 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
-        .product-img {
+       .product-img {
             width: 100% !important;
             aspect-ratio: 1 / 1.2 !important;
             margin-bottom: 20px !important;
-            border-radius: 2px !important;
-            background-color: #f5f5f5 !important; /* 배경색 */
-
-            /* 핵심 설정: 마우스 대기 전에도 보여야 함 */
+            background-color: transparent !important; 
             display: block !important;
-            opacity: 1 !important; 
-            visibility: visible !important;
-
-            /* 이미지 중복 방지 및 중앙 정렬 */
             background-repeat: no-repeat !important;
-            background-position: 55% center !important;
-            background-size: 230% !important; /* 이미지 크기 조절 */
+            background-position: center !important;
+
+            /* [고정] 이제 이 수치는 건드리지 마세요. 
+            이미지 자체의 여백을 조절해서 크기를 맞출 겁니다. */
+            background-size: 250% !important; 
             
-            transition: all 0.5s ease !important;
+            /* 3중 그림자 설정 유지 */
+            filter: 
+                drop-shadow(8px 15px 10px rgba(0, 0, 0, 0.08))
+                drop-shadow(15px 30px 20px rgba(0, 0, 0, 0.05))
+                drop-shadow(30px 50px 40px rgba(0, 0, 0, 0.03)) !important;
+            
+            transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
         }
 
         /* 마우스 올렸을 때 중복 방지 유지 및 크기만 변경 */
         .product-item:hover .product-img {
-            background-size: 280% !important;
-            background-repeat: no-repeat !important;
-            background-color: #efefef !important;
+            background-size: 280% !important; /* 호버 시 약간 확대 */
+            transform: translateY(-10px);
         }
 
         body { 
@@ -184,12 +185,40 @@
         }
         .product-item:hover { transform: translateY(-10px); }
         
-        .product-img { 
-            width: 100%; aspect-ratio: 1 / 1.2; 
-            background: #f0f0f0; margin-bottom: 20px; border-radius: 2px;
-            transition: box-shadow 0.4s ease;
+        .product-img {
+            width: 100% !important;
+            aspect-ratio: 1 / 1.2 !important;
+            margin-bottom: 20px !important;
+            background-color: transparent !important; 
+            display: block !important;
+            background-repeat: no-repeat !important;
+            background-position: center !important;
+
+            /* 요청하신 수치 적용 */
+            background-size: 300% !important; 
+            
+            /* [수정] 그림자를 3겹으로 쌓아 훨씬 묵직하고 선명하게 만듦 */
+            /* 1번: 제품 바로 밑의 짙은 선명한 그림자 */
+            /* 2번: 중간 거리의 부드러운 그림자 */
+            /* 3번: 멀리 퍼지는 은은한 햇빛 그림자 */
+            filter: 
+                drop-shadow(5px 10px 5px rgba(0, 0, 0, 0.15))
+                drop-shadow(15px 30px 20px rgba(0, 0, 0, 0.1))
+                drop-shadow(30px 50px 40px rgba(0, 0, 0, 0.05)) !important;
+            
+            transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
         }
-        .product-item:hover .product-img { box-shadow: 0 15px 30px rgba(0,0,0,0.08); }
+
+        .product-item:hover .product-img {
+            background-size: 345% !important; 
+            transform: translateY(-15px); /* 더 높이 띄워서 공간 확보 */
+            
+            /* 호버 시 그림자를 훨씬 더 길고 진하게 강조 */
+            filter: 
+                drop-shadow(8px 15px 10px rgba(0, 0, 0, 0.2))
+                drop-shadow(25px 50px 35px rgba(0, 0, 0, 0.15))
+                drop-shadow(50px 80px 60px rgba(0, 0, 0, 0.1)) !important;
+        }
 
         .product-info h3 { font-size: 1.1rem; margin-bottom: 8px; font-weight: 500; }
         .product-info p { color: var(--text-muted); font-size: 0.9rem; }
@@ -235,20 +264,22 @@
         
         <div id="productGrid" class="product-grid">
             <div class="product-item" data-category="acrylic" onclick="goToDetail('ab1')">
-                <div class="product-img" style="background-color: #f5f5f5; background-image: url('./assets/images/Acrylic Base.png');">
-            </div>
+                <div class="product-img" style="background-image: url('./assets/images/Acrylic Base.png');"></div>
                 <div class="product-info"><h3>Acrylic Base</h3><p>₩159,000</p></div>
             </div>
+
             <div class="product-item" data-category="acrylic" onclick="goToDetail('al1')">
-                <div class="product-img" style="background-color: #e8eef2;"></div>
+                <div class="product-img" style="background-image: url('./assets/images/Acrylic Layer.png');"></div>
                 <div class="product-info"><h3>Acrylic Layer</h3><p>₩139,000</p></div>
             </div>
+
             <div class="product-item" data-category="wood" onclick="goToDetail('wb1')">
-                <div class="product-img" style="background-color: #f2e9e1;"></div>
+                <div class="product-img" style="background-image: url('./assets/images/Wood Base.png');"></div>
                 <div class="product-info"><h3>Wood Base</h3><p>₩149,000</p></div>
             </div>
+
             <div class="product-item" data-category="wood" onclick="goToDetail('wl1')">
-                <div class="product-img" style="background-color: #ece0d1;"></div>
+                <div class="product-img" style="background-image: url('./assets/images/Wood Layer.png');"></div>
                 <div class="product-info"><h3>Wood Layer</h3><p>₩129,000</p></div>
             </div>
         </div>

@@ -5,6 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solute | Detail</title>
     <style>
+        #mainImg {
+            flex: 1; /* 왼쪽 영역을 차지하게 함 */
+            min-width: 500px; /* 최소 너비 확보 */
+            aspect-ratio: 1 / 1; /* 정사각형 비율 유지 (원하는 대로 조절 가능) */
+            
+            background-color: transparent !important;
+            background-size: 300% !important; /* 이미지 전체가 보이도록 함 */
+            background-position: center !important;
+            background-repeat: no-repeat !important;
+            
+            /* [핵심] 샵 페이지와 동일한 강력한 3중 햇빛 그림자 */
+            filter: 
+                drop-shadow(10px 20px 10px rgba(0, 0, 0, 0.15))
+                drop-shadow(30px 60px 40px rgba(0, 0, 0, 0.1))
+                drop-shadow(60px 100px 80px rgba(0, 0, 0, 0.05)) !important;
+            
+            opacity: 0;
+            transition: all 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        /* 이미지가 로드되었을 때 나타나는 효과 */
+        #mainImg.loaded {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 상세페이지 레이아웃 모바일 대응 */
+        @media (max-width: 768px) {
+            #mainImg {
+                min-width: 100%;
+                margin-bottom: 40px;
+            }
+        }
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;500&family=Playfair+Display:ital,wght@0,600;1,600&display=swap');
 
         :root {
@@ -94,18 +127,20 @@
         }
 
         /* [수정] PNG 이미지가 돋보이도록 개선된 이미지 영역 */
-        .detail-img { 
-            flex: 1.2; 
-            aspect-ratio: 1 / 1.1; 
-            background-color: #f5f5f5; 
-            border-radius: 2px; 
-            overflow: hidden;
-            background-repeat: no-repeat;
-            /* 샵 페이지 설정을 상세페이지 크기에 맞춰 계승 */
-            background-size: 300%; 
-            background-position: 55% center; 
-            opacity: 0; /* 애니메이션 시작 전 투명 */
-            transition: opacity 0.8s ease, transform 0.8s ease;
+        .detail-img-container img, 
+        .product-detail-img { /* 사용 중인 이미지 클래스명에 맞춰 적용하세요 */
+            width: 100%;
+            height: auto;
+            background-color: transparent !important; /* 배경색 제거 필수 */
+            
+            /* [핵심] 샵 페이지와 동일한 3중 햇빛 그림자 */
+            filter: 
+                drop-shadow(5px 10px 5px rgba(0, 0, 0, 0.15))
+                drop-shadow(15px 30px 20px rgba(0, 0, 0, 0.1))
+                drop-shadow(30px 50px 40px rgba(0, 0, 0, 0.05)) !important;
+            
+            /* 상세 페이지는 보통 호버 효과를 넣지 않거나 아주 미세하게 넣습니다 */
+            transition: filter 0.6s ease;
         }
 
         .detail-img.loaded {
@@ -189,9 +224,9 @@
         // [수정] 상품 데이터에 이미지 경로(img) 추가
         const products = {
             "ab1": { name: "Acrylic Base", price: "₩159,000", color: "#f5f5f5", code: "AB1", img: "./assets/images/Acrylic Base.png" },
-            "al1": { name: "Acrylic Layer", price: "₩139,000", color: "#e8eef2", code: "AL1" },
-            "wb1": { name: "Wood Base", price: "₩149,000", color: "#f2e9e1", code: "WB1" },
-            "wl1": { name: "Wood Layer", price: "₩129,000", color: "#ece0d1", code: "WL1" }
+            "al1": { name: "Acrylic Layer", price: "₩139,000", color: "#e8eef2", code: "AL1", img: "./assets/images/Acrylic Layer.png" },
+            "wb1": { name: "Wood Base", price: "₩149,000", color: "#f2e9e1", code: "WB1", img: "./assets/images/Wood Base.png" },
+            "wl1": { name: "Wood Layer", price: "₩129,000", color: "#ece0d1", code: "WL1", img: "./assets/images/Wood Layer.png" }
         };
 
         const params = new URLSearchParams(window.location.search);
@@ -207,18 +242,16 @@
             
             const mainImgElem = document.getElementById('mainImg');
             
-            // [핵심] PNG 이미지가 있는 경우 배경 이미지로 세팅
             if (currentProduct.img) {
                 mainImgElem.style.backgroundImage = `url('${currentProduct.img}')`;
-                mainImgElem.style.backgroundColor = currentProduct.color;
+                // mainImgElem.style.backgroundColor = currentProduct.color; // <- 이 줄을 주석 처리하거나 삭제하세요.
+                mainImgElem.style.backgroundColor = "transparent"; // 페이지 배경이 보이도록 투명 설정
             } else {
-                mainImgElem.style.backgroundColor = currentProduct.color;
+                mainImgElem.style.backgroundColor = "transparent";
             }
             
-            mainImgElem.classList.add('loaded'); // 애니메이션 실행
+            mainImgElem.classList.add('loaded');
             document.title = `Solute | ${currentProduct.name}`;
-        } else {
-            window.location.href = 'shop.html';
         }
 
         function updateCartStatus() {
