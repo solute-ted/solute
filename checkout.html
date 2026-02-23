@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solute | Checkout</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;500&family=Playfair+Display:ital,wght@0,600;1,600&display=swap');
+
+        :root {
+            --bg-color: #fcfcfc;
+            --primary-dark: #1a1a1a;
+            --text-muted: #888;
+            --border-light: #eee;
+        }
+
+        /* 기본 설정 */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            background-color: var(--bg-color);
+            font-family: 'Noto Sans KR', sans-serif;
+            color: var(--primary-dark);
+            line-height: 1.6;
+        }
+
+        /* 로딩 오버레이 (주문 완료 연출용) */
+        #loading-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #fcfcfc; display: flex; justify-content: center; align-items: center;
+            z-index: 99999; opacity: 0; visibility: hidden;
+            transition: opacity 0.4s ease;
+            font-family: 'Playfair Display', serif; letter-spacing: 3px;
+        }
+        #loading-overlay.active { opacity: 1; visibility: visible; }
+
+        /* 헤더 스타일 */
+        header {
+            position: fixed; top: 0; left: 0; width: 100%;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 40px 60px; background-color: var(--bg-color);
+            z-index: 10000;
+        }
+        .logo { 
+            font-family: 'Playfair Display', serif; 
+            font-size: 1.8rem; 
+            font-weight: 600; 
+            letter-spacing: 3px; 
+            text-decoration: none; 
+            color: var(--primary-dark); 
+        }
+
+        /* 메인 컨테이너 */
+        .checkout-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 160px 60px 100px;
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 80px;
+        }
+
+        h2 { font-family: 'Playfair Display', serif; font-size: 2.8rem; margin-bottom: 50px; }
+        h3 { font-size: 1rem; margin-bottom: 25px; font-weight: 500; text-transform: uppercase; letter-spacing: 1.5px; border-bottom: 1px solid #f0f0f0; padding-bottom: 15px; }
+
+        /* 입력 폼 스타일 */
+        .checkout-section { margin-bottom: 60px; }
+        .input-group { margin-bottom: 20px; }
+        .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        
+        label { display: block; font-size: 0.7rem; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+        input {
+            width: 100%;
+            padding: 16px;
+            border: 1px solid #e0e0e0;
+            background: #fff;
+            font-size: 0.9rem;
+            border-radius: 2px;
+            outline: none;
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+        input:focus { border-color: var(--primary-dark); box-shadow: 0 0 0 1px var(--primary-dark); }
+        input::placeholder { color: #ccc; }
+
+        /* 우측 주문 요약 섹션 */
+        .order-summary {
+            background: #fff;
+            padding: 40px;
+            border: 1px solid var(--border-light);
+            height: fit-content;
+            position: sticky;
+            top: 140px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+        .summary-item.total {
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid var(--border-light);
+            font-weight: 500;
+            font-size: 1.2rem;
+        }
+
+        /* 요약 리스트 내 상품 스타일 */
+        .mini-order-list { margin-bottom: 30px; }
+        .mini-order-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .mini-order-img {
+            width: 60px; height: 60px;
+            background: #f5f5f5;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+        .mini-order-info { flex: 1; }
+        .mini-order-info .name { font-size: 0.85rem; font-weight: 500; display: block; margin-bottom: 2px; }
+        .mini-order-info .qty { font-size: 0.75rem; color: var(--text-muted); }
+        .mini-order-price { font-size: 0.85rem; font-weight: 500; }
+
+        /* 주문 버튼 */
+        .checkout-btn {
+            width: 100%;
+            padding: 22px;
+            background: var(--primary-dark);
+            color: #fff;
+            border: none;
+            margin-top: 30px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 2px;
+        }
+        .checkout-btn:hover { background: #333; transform: translateY(-2px); }
+
+        /* 반응형 */
+        @media (max-width: 1024px) {
+            .checkout-container { grid-template-columns: 1fr; gap: 60px; padding: 140px 25px 60px; }
+            header { padding: 30px 25px; }
+            .order-summary { position: static; padding: 30px; }
+            h2 { font-size: 2.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loading-overlay">PROCESSING...</div>
+
+    <header>
+        <a href="./index.html" class="logo">Solute</a>
+    </header>
+
+    <div class="checkout-container">
+        <div class="checkout-form">
+            <h2>Checkout</h2>
+            
+            <div class="checkout-section">
+                <h3>Shipping Information</h3>
+                <div class="input-group">
+                    <label>Email Address</label>
+                    <input type="email" id="email" placeholder="example@solute.com">
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>First Name</label>
+                        <input type="text" id="fname">
+                    </div>
+                    <div class="input-group">
+                        <label>Last Name</label>
+                        <input type="text" id="lname">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Shipping Address</label>
+                    <input type="text" placeholder="Street Address" style="margin-bottom: 12px;">
+                    <input type="text" placeholder="Apartment, suite, etc. (optional)">
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>City</label>
+                        <input type="text">
+                    </div>
+                    <div class="input-group">
+                        <label>Postal Code</label>
+                        <input type="text">
+                    </div>
+                </div>
+            </div>
+
+            <div class="checkout-section">
+                <h3>Payment Details</h3>
+                <div class="input-group">
+                    <label>Card Number</label>
+                    <input type="text" placeholder="0000 0000 0000 0000">
+                </div>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label>Expiration (MM/YY)</label>
+                        <input type="text" placeholder="MM / YY">
+                    </div>
+                    <div class="input-group">
+                        <label>CVV</label>
+                        <input type="text" placeholder="123">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="order-summary">
+            <h3>Order Summary</h3>
+            <div id="mini-order-list" class="mini-order-list">
+                </div>
+            
+            <div class="summary-item">
+                <span>Subtotal</span>
+                <span id="subtotal">₩0</span>
+            </div>
+            <div class="summary-item">
+                <span>Shipping</span>
+                <span>Free</span>
+            </div>
+            <div class="summary-item total">
+                <span>Total</span>
+                <span id="final-total">₩0</span>
+            </div>
+
+            <button class="checkout-btn" onclick="processOrder()">PLACE ORDER</button>
+        </div>
+    </div>
+
+    <script>
+        // 1. 주문 요약 데이터 렌더링
+        function loadOrderSummary() {
+            const cart = JSON.parse(localStorage.getItem('solute_cart')) || [];
+            const listElement = document.getElementById('mini-order-list');
+            const subtotalElement = document.getElementById('subtotal');
+            const totalElement = document.getElementById('final-total');
+
+            if (cart.length === 0) {
+                alert("주문할 상품이 없습니다.");
+                window.location.href = "./shop.html";
+                return;
+            }
+
+            let subtotal = 0;
+            listElement.innerHTML = cart.map(item => {
+                const priceNum = parseInt(item.price.replace(/[^0-9]/g, ''));
+                subtotal += priceNum * item.quantity;
+                return `
+                    <div class="mini-order-item">
+                        <div class="mini-order-img" style="background-color: ${item.color || '#f0f0f0'}"></div>
+                        <div class="mini-order-info">
+                            <span class="name">${item.name}</span>
+                            <span class="qty">Qty: ${item.quantity}</span>
+                        </div>
+                        <div class="mini-order-price">₩${(priceNum * item.quantity).toLocaleString()}</div>
+                    </div>
+                `;
+            }).join('');
+
+            subtotalElement.innerText = `₩${subtotal.toLocaleString()}`;
+            totalElement.innerText = `₩${subtotal.toLocaleString()}`;
+        }
+
+        // 2. 주문 프로세스 실행
+        function processOrder() {
+            // 간단한 유효성 검사 예시
+            const email = document.getElementById('email').value;
+            const fname = document.getElementById('fname').value;
+
+            if (!email || !fname) {
+                alert("배송 정보를 모두 입력해주세요.");
+                return;
+            }
+
+            const overlay = document.getElementById('loading-overlay');
+            overlay.classList.add('active');
+
+            // 2초 뒤 주문 완료 처리 연출
+            setTimeout(() => {
+                alert(`감사합니다, ${fname}님! 주문이 완료되었습니다.`);
+                localStorage.removeItem('solute_cart'); // 장바구니 비우기
+                window.location.href = "./index.html"; 
+            }, 2000);
+        }
+
+        window.onload = loadOrderSummary;
+    </script>
+</body>
+</html>

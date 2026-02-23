@@ -9,35 +9,67 @@
         
         :root { --bg-color: #fcfcfc; --primary-dark: #1a1a1a; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background-color: var(--bg-color); font-family: 'Noto Sans KR', sans-serif; }
+        body { background-color: var(--bg-color); font-family: 'Noto Sans KR', sans-serif; overflow-x: hidden; }
 
-        header { position: fixed; top: 0; width: 100%; display: flex; justify-content: space-between; padding: 40px 60px; background: var(--bg-color); z-index: 100; }
+        /* 헤더 */
+        header { position: fixed; top: 0; width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 40px 60px; background: var(--bg-color); z-index: 100; }
         .logo { font-family: 'Playfair Display', serif; font-size: 1.8rem; text-decoration: none; color: #000; font-weight: 600; letter-spacing: 3px; }
+        .nav-link { text-decoration: none; color: #000; font-size: 0.85rem; font-weight: 500; letter-spacing: 1px; }
 
+        /* 카트 컨테이너 */
         .cart-container { padding: 180px 10% 100px; max-width: 1200px; margin: 0 auto; min-height: 100vh; }
         h2 { font-family: 'Playfair Display', serif; font-size: 3rem; margin-bottom: 50px; }
 
+        /* 카트 아이템 리스트 */
         .cart-item { display: flex; align-items: center; padding: 30px 0; border-bottom: 1px solid #eee; gap: 30px; }
-        .cart-img { width: 120px; aspect-ratio: 1/1; background: #eee; }
+        .cart-img { width: 120px; aspect-ratio: 1/1; background: #eee; border-radius: 2px; }
         .cart-info { flex: 2; }
-        .cart-info h3 { font-size: 1.1rem; margin-bottom: 5px; }
-        .cart-info p { color: #888; font-size: 0.9rem; }
+        .cart-info h3 { font-size: 1.1rem; margin-bottom: 5px; font-weight: 500; }
+        .cart-info p { color: #888; font-size: 0.9rem; margin-bottom: 10px; }
         
-        .cart-qty { flex: 1; text-align: center; }
-        .cart-price { flex: 1; text-align: right; font-weight: 500; }
-        .remove-btn { cursor: pointer; color: #ccc; font-size: 0.8rem; text-decoration: underline; margin-top: 10px; display: inline-block; }
+        .cart-qty { flex: 1; text-align: center; color: #555; font-size: 0.95rem; }
+        .cart-price { flex: 1; text-align: right; font-weight: 500; font-size: 1rem; }
+        .remove-btn { cursor: pointer; color: #aaa; font-size: 0.75rem; text-decoration: underline; transition: color 0.3s; }
+        .remove-btn:hover { color: #ff4d4d; }
 
+        /* 하단 요약 및 버튼 */
         .cart-summary { margin-top: 50px; border-top: 2px solid #1a1a1a; padding-top: 30px; text-align: right; }
         .total-price { font-size: 2rem; font-family: 'Playfair Display', serif; margin-bottom: 30px; }
-        .checkout-btn { padding: 20px 60px; background: #1a1a1a; color: #fff; text-decoration: none; letter-spacing: 2px; }
+        .total-price span { margin-left: 20px; }
         
-        .empty-msg { text-align: center; padding: 100px 0; color: #aaa; }
+        .checkout-btn { 
+            display: inline-block;
+            padding: 20px 80px; 
+            background: #1a1a1a; 
+            color: #fff; 
+            border: none;
+            font-size: 0.9rem;
+            letter-spacing: 2px; 
+            cursor: pointer;
+            transition: opacity 0.3s;
+            border-radius: 2px;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        .checkout-btn:hover { opacity: 0.8; }
+        
+        .empty-msg { text-align: center; padding: 100px 0; color: #aaa; font-size: 1.1rem; }
+
+        @media (max-width: 768px) {
+            header { padding: 30px 25px; }
+            .cart-container { padding-top: 140px; }
+            h2 { font-size: 2.2rem; }
+            .cart-item { flex-wrap: wrap; gap: 15px; }
+            .cart-img { width: 80px; }
+            .cart-qty, .cart-price { flex: none; width: 50%; text-align: left; margin-top: 10px; }
+            .cart-price { text-align: right; }
+            .checkout-btn { width: 100%; }
+        }
     </style>
 </head>
 <body>
     <header>
         <a href="index.html" class="logo">Solute</a>
-        <nav><a href="shop.html" style="text-decoration:none; color:#000; font-size:0.9rem;">CONTINUE SHOPPING</a></nav>
+        <nav><a href="shop.html" class="nav-link">CONTINUE SHOPPING</a></nav>
     </header>
 
     <div class="cart-container">
@@ -46,11 +78,12 @@
             </div>
         <div class="cart-summary" id="cartSummary">
             <div class="total-price">Total: <span id="totalAmount">₩0</span></div>
-            <a href="#" class="checkout-btn">CHECK OUT</a>
+            <button class="checkout-btn" onclick="goToCheckout()">CHECK OUT</button>
         </div>
     </div>
 
     <script>
+        // 1. 카트 화면 렌더링
         function renderCart() {
             const cart = JSON.parse(localStorage.getItem('solute_cart')) || [];
             const listContainer = document.getElementById('cartList');
@@ -69,14 +102,14 @@
 
                 return `
                     <div class="cart-item">
-                        <div class="cart-img" style="background-color: ${item.color}"></div>
+                        <div class="cart-img" style="background-color: ${item.color || '#eee'}"></div>
                         <div class="cart-info">
                             <h3>${item.name}</h3>
-                            <p>${item.code}</p>
+                            <p>${item.code || 'Standard Collection'}</p>
                             <span class="remove-btn" onclick="removeItem(${index})">Remove</span>
                         </div>
                         <div class="cart-qty">Qty: ${item.quantity}</div>
-                        <div class="cart-price">${item.price}</div>
+                        <div class="cart-price">₩${(priceNum * item.quantity).toLocaleString()}</div>
                     </div>
                 `;
             }).join('');
@@ -85,11 +118,25 @@
             summary.style.display = 'block';
         }
 
+        // 2. 아이템 삭제 기능
         function removeItem(index) {
             let cart = JSON.parse(localStorage.getItem('solute_cart')) || [];
             cart.splice(index, 1);
             localStorage.setItem('solute_cart', JSON.stringify(cart));
             renderCart();
+        }
+
+        // 3. 체크아웃 페이지 이동 기능 (핵심 수정 사항)
+        function goToCheckout() {
+            const cart = JSON.parse(localStorage.getItem('solute_cart')) || [];
+            
+            if (cart.length === 0) {
+                alert("장바구니가 비어 있습니다.");
+                return;
+            }
+            
+            // 결제 페이지로 이동
+            window.location.href = './checkout.html';
         }
 
         window.onload = renderCart;
