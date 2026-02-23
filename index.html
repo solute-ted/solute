@@ -33,18 +33,20 @@
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background-color: var(--bg-color);
+            background-color: #fcfcfc; /* 배경색 */
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 10000;
+            z-index: 99999; /* 최상단에 위치 */
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.4s ease, visibility 0.4s ease;
+            /* 0.4초는 너무 느릴 수 있으니 0.2초 정도로 빠르게 나타나게 합니다 */
+            transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
         }
+
         #loading-overlay.is-loading {
-            opacity: 1;
-            visibility: visible;
+            opacity: 1 !important;
+            visibility: visible !important;
         }
         .loading-text {
             font-family: 'Playfair Display', serif;
@@ -165,28 +167,44 @@
     <script>
         const overlay = document.getElementById('loading-overlay');
 
-        // [iOS 최적화] 레이어 클릭 시 화면 전환 부하 분산
-        // 창이 포커스를 잃을 때(새 탭 열림) 로딩 화면 활성화
-        window.addEventListener('blur', function() {
+        // [핵심] 페이지 전환 함수
+        function handleTransition(url) {
+            // 1. 먼저 로딩 화면을 띄웁니다.
+            overlay.classList.add('is-loading');
+
+            // 2. 브라우저가 로딩 화면을 그릴 시간을 준 뒤(requestAnimationFrame),
+            // 1초(1000ms) 뒤에 페이지를 이동시킵니다.
+            setTimeout(() => {
+                window.location.href = url;
+            }, 1000); 
+        }
+
+        // 1. 상단 메뉴(SHOP 등) 클릭 시
+        document.querySelectorAll('nav a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                const targetUrl = this.getAttribute('href');
+                if (targetUrl && targetUrl !== '#' && !targetUrl.includes('mailto')) {
+                    e.preventDefault();
+                    handleTransition(targetUrl);
+                }
+            });
+        });
+
+        // 2. Spline 레이어 클릭 감지 (가장 중요)
+        // 배포 환경에서는 Spline 내부 클릭을 직접 가로채기 어려우므로, 
+        // 브라우저의 '포커스 아웃'과 '페이지 떠남'을 감지하여 로딩을 즉시 띄웁니다.
+        window.addEventListener('blur', () => {
             overlay.classList.add('is-loading');
         });
 
-        // 다시 돌아왔을 때 로딩 해제
-        window.addEventListener('focus', function() {
-            setTimeout(() => {
-                overlay.classList.remove('is-loading');
-            }, 500);
+        window.addEventListener('beforeunload', () => {
+            overlay.classList.add('is-loading');
         });
 
-        // iOS 뒤로가기 시 로딩 제거 (bfcache 대응)
-        window.addEventListener('pageshow', function(event) {
-            if (event.persisted) {
-                overlay.classList.remove('is-loading');
-            }
+        // 3. 페이지가 로드되거나 돌아왔을 때 로딩 해제
+        window.addEventListener('pageshow', (event) => {
+            overlay.classList.remove('is-loading');
         });
-
-        // 터치 이벤트 지연 방지
-        document.addEventListener('touchstart', function() {}, {passive: true});
     </script>
 </body>
 </html>
