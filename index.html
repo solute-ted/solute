@@ -318,11 +318,14 @@ if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
 
     if (splineContainer) {
 
-        splineContainer.addEventListener('click', function() {
+        splineContainer.addEventListener('touchstart', function(e) {
+
+            e.preventDefault();
+            e.stopPropagation();
 
             window.location.href = "shop.html";
 
-        });
+        }, { passive:false });
 
     }
 
