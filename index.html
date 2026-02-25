@@ -312,6 +312,22 @@ window.location.href=iframe.src;
 
 },500);
 
+if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+
+    const splineContainer = document.querySelector('.spline-background');
+
+    if (splineContainer) {
+
+        splineContainer.addEventListener('click', function() {
+
+            window.location.href = "shop.html";
+
+        });
+
+    }
+
+}
+
 
 </script>
 
