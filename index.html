@@ -1,298 +1,319 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solute | 가구가 공간에 녹아드는 순간</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;500&family=Playfair+Display:ital,wght@0,600;1,600&display=swap');
 
-<title>Solute | 가구가 공간에 녹아드는 순간</title>
+        :root {
+            --bg-color: #fcfcfc; 
+            --primary-dark: #1a1a1a;
+            --accent-green: #4a5d4e;
+        }
 
-<style>
+        * { 
+            margin: 0; padding: 0; box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; 
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        body, html { 
+            height: 100%; width: 100%;
+            overflow: hidden; 
+            background-color: var(--bg-color); 
+            font-family: 'Noto Sans KR', sans-serif; 
+        }
 
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;500&family=Playfair+Display:ital,wght@0,600;1,600&display=swap');
+        #loading-overlay {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: #fcfcfc;
+            display: flex; justify-content: center; align-items: center;
+            z-index: 99999; opacity: 0; visibility: hidden;
+            transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+        }
+        #loading-overlay.is-loading { opacity: 1 !important; visibility: visible !important; }
+        .loading-text { font-family: 'Playfair Display', serif; font-size: 1rem; letter-spacing: 3px; color: var(--primary-dark); }
 
-:root{
---bg-color:#fcfcfc;
---primary-dark:#1a1a1a;
---accent-green:#4a5d4e;
-}
+        header {
+            position: fixed; top: 0; width: 100%;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 40px 60px; z-index: 10000;
+            transform: translateZ(0);
+        }
+        .logo { 
+            font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 600; 
+            letter-spacing: 3px; text-decoration: none; color: var(--primary-dark); 
+        }
+        
+        nav { display: flex; align-items: center; position: relative; }
+        #cart-link { position: relative; padding-bottom: 10px; margin-bottom: -10px; }
+        nav a { text-decoration: none; color: var(--primary-dark); margin-left: 40px; font-size: 0.85rem; letter-spacing: 1px; font-weight: 500; }
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
--webkit-tap-highlight-color:transparent;
-}
+        .mini-cart {
+            position: absolute;
+            top: 40px; right: 0;
+            width: 280px;
+            background: #fff;
+            border: 1px solid #eee;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+            padding: 20px;
+            z-index: 10001;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            text-align: left;
+        }
+        .mini-cart.active { opacity: 1; visibility: visible; transform: translateY(0); }
+        
+        .mini-cart-header { font-size: 0.7rem; letter-spacing: 1px; color: #aaa; margin-bottom: 15px; border-bottom: 1px solid #f5f5f5; padding-bottom: 10px; text-transform: uppercase; }
+        .mini-item { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+        .mini-img { width: 50px; height: 50px; background: #eee; border-radius: 2px; flex-shrink: 0; }
+        .mini-info h4 { font-size: 0.85rem; margin-bottom: 2px; font-weight: 500; color: var(--primary-dark); }
+        .mini-info p { font-size: 0.75rem; color: #888; }
+        .go-cart-btn { 
+            display: block; width: 100%; padding: 12px; 
+            background: var(--primary-dark); color: #fff !important; 
+            text-align: center; font-size: 0.75rem; text-decoration: none; 
+            letter-spacing: 1px; margin-top: 10px; margin-left: 0 !important; 
+        }
 
-body,html{
-height:100%;
-width:100%;
-overflow:hidden;
-background:var(--bg-color);
-font-family:'Noto Sans KR',sans-serif;
-}
+        .hero-container { position: relative; width: 100vw; height: 100vh; background-color: var(--bg-color); }
+        .spline-background { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        .spline-background iframe { width: 100%; height: 100%; border: none; transform: scale(1.01); cursor: pointer; touch-action: none; }
 
+        .hero-content {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%) translateZ(0);
+            z-index: 2; text-align: center; pointer-events: none;
+        }
+        .hero-content h1 { font-family: 'Playfair Display', serif; font-size: 5rem; color: var(--primary-dark); line-height: 1.1; margin-bottom: 20px; text-shadow: 0 0 30px rgba(255,255,255,1); }
+        .hero-content p { font-size: 1.1rem; letter-spacing: 2px; color: var(--accent-green); font-weight: 300; }
 
-/* LOADING */
+        .scroll-indicator { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 2; font-size: 0.7rem; letter-spacing: 3px; color: #aaa; text-transform: uppercase; }
 
-#loading-overlay{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:#fcfcfc;
-display:flex;
-justify-content:center;
-align-items:center;
-z-index:999999;
-opacity:0;
-visibility:hidden;
-transition:.25s;
-}
-
-#loading-overlay.show{
-opacity:1;
-visibility:visible;
-}
-
-.loading-text{
-font-family:'Playfair Display';
-letter-spacing:4px;
-}
-
-
-/* HEADER */
-
-header{
-position:fixed;
-top:0;
-width:100%;
-display:flex;
-justify-content:space-between;
-padding:40px 60px;
-z-index:10000;
-}
-
-.logo{
-font-family:'Playfair Display';
-font-size:1.8rem;
-letter-spacing:3px;
-text-decoration:none;
-color:#000;
-}
-
-nav a{
-margin-left:40px;
-text-decoration:none;
-color:#000;
-font-size:.85rem;
-}
-
-
-/* HERO */
-
-.hero-container{
-position:relative;
-width:100vw;
-height:100vh;
-}
-
-.spline-background{
-position:absolute;
-width:100%;
-height:100%;
-z-index:1;
-}
-
-iframe{
-width:100%;
-height:100%;
-border:0;
-transform:scale(1.01);
-}
-
-
-.hero-content{
-position:absolute;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-text-align:center;
-z-index:2;
-pointer-events:none;
-}
-
-.hero-content h1{
-font-family:'Playfair Display';
-font-size:5rem;
-text-shadow:0 0 30px white;
-}
-
-.hero-content p{
-letter-spacing:2px;
-color:var(--accent-green);
-}
-
-</style>
+        @media (max-width: 768px) {
+            header { padding: 30px 25px; }
+            .hero-content h1 { font-size: 3rem; }
+            nav a { margin-left: 20px; }
+            .mini-cart { width: 250px; right: -10px; }
+        }
+    </style>
 </head>
-
-
-
 <body>
-
-
 
 <div id="loading-overlay">
 <div class="loading-text">SOLUTE</div>
 </div>
 
-
-
 <header>
-
-<a href="index.html" class="logo">
-Solute
-</a>
+<a href="index.html" class="logo">Solute</a>
 
 <nav>
-
 <a href="shop.html">SHOP</a>
+<a href="./cart.html" id="cart-link">CART<span id="cart-count"></span></a>
 
-<a href="cart.html">
-CART
-</a>
-
+<div id="mini-cart" class="mini-cart">
+<div class="mini-cart-header">RECENTLY ADDED</div>
+<div id="mini-cart-list"></div>
+<a href="./cart.html" class="go-cart-btn">VIEW ALL CART</a>
+</div>
 </nav>
-
 </header>
-
-
-
 
 <main class="hero-container">
 
-
 <div class="spline-background">
-
-<iframe
-id="splineFrame"
-src="https://my.spline.design/3dstackcopycopycopycopy-JmAuSYykJNAnClHAeAwUes9v-fDk/"
-></iframe>
-
+<iframe src="https://my.spline.design/3dstackcopycopycopycopy-JmAuSYykJNAnClHAeAwUes9v-fDk/" frameborder="0"></iframe>
 </div>
-
-
 
 <div class="hero-content">
-
 <p>RECYCLE & MODULE</p>
-
 <h1>Solute</h1>
-
 </div>
 
+<div class="scroll-indicator">Scroll to Explore</div>
 
 </main>
 
-
-
-
 <script>
 
+let miniCartTimer;
 
-const overlay = document.getElementById("loading-overlay");
+function updateCartStatus() {
+const cart = JSON.parse(localStorage.getItem('solute_cart')) || [];
+const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+const countElement = document.getElementById('cart-count');
 
+if (countElement) {
+countElement.innerText = totalCount > 0 ? `(${totalCount})` : "";
+}
 
+const miniCartList = document.getElementById('mini-cart-list');
 
-function showLoading(){
+if (miniCartList && cart.length > 0) {
 
-overlay.classList.add("show");
+const recentItems = [...cart].reverse().slice(0,3);
 
-/* iOS 렌더 freeze 방지 */
+miniCartList.innerHTML = recentItems.map(item=>`
+<div class="mini-item">
+<div class="mini-img" style="background-color:${item.color || '#eee'}"></div>
+<div class="mini-info">
+<h4>${item.name}</h4>
+<p>${item.price} (Qty:${item.quantity})</p>
+</div>
+</div>
+`).join('');
 
-document.body.style.opacity="0.99";
+}
+else{
+
+miniCartList.innerHTML='<p style="font-size:0.75rem;color:#ccc;margin-bottom:15px;">장바구니가 비어있습니다.</p>';
+
+}
 
 }
 
 
 
-function go(url){
+function initCartHoverEvents(){
 
-showLoading();
+const cartLink=document.getElementById('cart-link');
+const miniCart=document.getElementById('mini-cart');
 
-/* iframe 강제 제거 → 잔상 완전 제거 */
+if(!cartLink || !miniCart) return;
 
-const frame=document.getElementById("splineFrame");
 
-if(frame) frame.remove();
+cartLink.addEventListener('mouseenter',()=>{
 
+clearTimeout(miniCartTimer);
+
+updateCartStatus();
+
+miniCart.classList.add('active');
+
+});
+
+
+cartLink.addEventListener('mouseleave',()=>{
+
+miniCartTimer=setTimeout(()=>{
+
+miniCart.classList.remove('active');
+
+},500);
+
+});
+
+
+miniCart.addEventListener('mouseenter',()=>{
+
+clearTimeout(miniCartTimer);
+
+});
+
+
+miniCart.addEventListener('mouseleave',()=>{
+
+miniCartTimer=setTimeout(()=>{
+
+miniCart.classList.remove('active');
+
+},500);
+
+});
+
+}
+
+
+
+const overlay=document.getElementById('loading-overlay');
+
+function handleTransition(url){
+
+overlay.classList.add('is-loading');
 
 setTimeout(()=>{
 
 window.location.href=url;
 
-},400);
+},1000);
 
 }
 
 
 
-/* NAV 이동 */
+document.querySelectorAll('nav a').forEach(link=>{
 
-document.querySelectorAll("nav a").forEach(link=>{
+link.addEventListener('click',function(e){
 
-link.onclick=e=>{
+const targetUrl=this.getAttribute('href');
+
+if(targetUrl && targetUrl!=='#' && !targetUrl.includes('mailto')){
 
 e.preventDefault();
 
-go(link.href);
-
-};
-
-});
-
-
-
-/* SPLINE 이동 감지 */
-
-window.addEventListener("message",function(e){
-
-if(!e.data) return;
-
-/* spline open link 감지 */
-
-if(typeof e.data==="string" && e.data.includes("shop.html")){
-
-go("https://solute-ted.github.io/solute/shop.html");
+handleTransition(targetUrl);
 
 }
 
 });
 
+});
 
 
-/* iOS 잔상 방지 핵심 */
 
-window.addEventListener("pagehide",()=>{
+window.addEventListener('beforeunload',()=>{
 
-document.body.innerHTML="";
+overlay.classList.add('is-loading');
+
+const start=Date.now();
+
+while(Date.now()-start<1000){}
 
 });
 
 
 
-/* 복귀시 overlay 제거 */
+window.addEventListener('load',()=>{
 
-window.addEventListener("pageshow",()=>{
+updateCartStatus();
 
-overlay.classList.remove("show");
+initCartHoverEvents();
 
 });
 
+
+window.addEventListener('pageshow',()=>{
+
+overlay.classList.remove('is-loading');
+
+updateCartStatus();
+
+});
+
+
+/* ⭐ iOS spline iframe 이동 문제 해결 (추가된 부분) */
+
+setInterval(()=>{
+
+const iframe=document.querySelector('.spline-background iframe');
+
+if(!iframe) return;
+
+if(iframe.src.includes("shop.html")){
+
+window.location.href=iframe.src;
+
+}
+
+},500);
 
 
 </script>
-
 
 </body>
 </html>
