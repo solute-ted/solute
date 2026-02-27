@@ -8,330 +8,532 @@
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;500&family=Playfair+Display:ital,wght@0,600;1,600&display=swap');
 
         :root {
-            --bg-color: #fcfcfc; 
+            --bg-color: #fcfcfc;
             --primary-dark: #1a1a1a;
             --accent-green: #4a5d4e;
         }
 
-        * { 
-            margin: 0; padding: 0; box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent; 
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
             -webkit-font-smoothing: antialiased;
         }
-        
-        body, html { 
-            height: 100%; width: 100%;
-            overflow: hidden; 
-            background-color: var(--bg-color); 
-            font-family: 'Noto Sans KR', sans-serif; 
+
+        body, html {
+            width: 100%;
+            background-color: var(--bg-color);
+            font-family: 'Noto Sans KR', sans-serif;
         }
 
+        /* ─── 페이지 전환 오버레이 (로딩 텍스트 없음, 전환시만 사용) ─── */
         #loading-overlay {
             position: fixed; top: 0; left: 0;
             width: 100%; height: 100%;
             background-color: #fcfcfc;
-            display: flex; justify-content: center; align-items: center;
-            z-index: 99999; opacity: 0; visibility: hidden;
-            transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+            z-index: 99999;
+            opacity: 0; visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
         }
-        #loading-overlay.is-loading { opacity: 1 !important; visibility: visible !important; }
-        .loading-text { font-family: 'Playfair Display', serif; font-size: 1rem; letter-spacing: 3px; color: var(--primary-dark); }
+        #loading-overlay.active { opacity: 1; visibility: visible; pointer-events: all; }
 
+        /* ─── 헤더 ─── */
         header {
             position: fixed; top: 0; width: 100%;
             display: flex; justify-content: space-between; align-items: center;
             padding: 40px 60px; z-index: 10000;
             transform: translateZ(0);
         }
-        .logo { 
-            font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 600; 
-            letter-spacing: 3px; text-decoration: none; color: var(--primary-dark); 
+        header nav:first-of-type { position: absolute; left: 50%; transform: translateX(-50%); }
+        .logo {
+            font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 600;
+            letter-spacing: 1px; text-decoration: none; color: var(--primary-dark);
         }
-        
         nav { display: flex; align-items: center; position: relative; }
         #cart-link { position: relative; padding-bottom: 10px; margin-bottom: -10px; }
-        nav a { text-decoration: none; color: var(--primary-dark); margin-left: 40px; font-size: 0.85rem; letter-spacing: 1px; font-weight: 500; }
+        nav a {
+            text-decoration: none; color: var(--primary-dark);
+            margin-left: 20px; font-size: 0.85rem;
+            letter-spacing: 0px; font-weight: 400;
+        }
 
+        /* ─── 미니카트 ─── */
         .mini-cart {
-            position: absolute;
-            top: 40px; right: 0;
-            width: 280px;
-            background: #fff;
-            border: 1px solid #eee;
+            position: absolute; top: 40px; right: 0; width: 280px;
+            background: #fff; border: 1px solid #eee;
             box-shadow: 0 15px 40px rgba(0,0,0,0.1);
-            padding: 20px;
-            z-index: 10001;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(10px);
+            padding: 20px; z-index: 10001;
+            opacity: 0; visibility: hidden; transform: translateY(10px);
             transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
             text-align: left;
         }
         .mini-cart.active { opacity: 1; visibility: visible; transform: translateY(0); }
-        
         .mini-cart-header { font-size: 0.7rem; letter-spacing: 1px; color: #aaa; margin-bottom: 15px; border-bottom: 1px solid #f5f5f5; padding-bottom: 10px; text-transform: uppercase; }
         .mini-item { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
         .mini-img { width: 50px; height: 50px; background: #eee; border-radius: 2px; flex-shrink: 0; }
         .mini-info h4 { font-size: 0.85rem; margin-bottom: 2px; font-weight: 500; color: var(--primary-dark); }
         .mini-info p { font-size: 0.75rem; color: #888; }
-        .go-cart-btn { 
-            display: block; width: 100%; padding: 12px; 
-            background: var(--primary-dark); color: #fff !important; 
-            text-align: center; font-size: 0.75rem; text-decoration: none; 
-            letter-spacing: 1px; margin-top: 10px; margin-left: 0 !important; 
+        .go-cart-btn {
+            display: block; width: 100%; padding: 12px;
+            background: var(--primary-dark); color: #fff !important;
+            text-align: center; font-size: 0.75rem; text-decoration: none;
+            letter-spacing: 1px; margin-top: 10px; margin-left: 0 !important;
         }
 
-        .hero-container { position: relative; width: 100vw; height: 100vh; background-color: var(--bg-color); }
-        .spline-background { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-        .spline-background iframe { width: 100%; height: 100%; border: none; transform: scale(1.01); cursor: pointer; touch-action: none; }
+        /* ══════════════════════════════════
+           ─── HERO — Spline 고정 배경 ───
+           ══════════════════════════════════ */
 
+        /* hero-wrapper: 100vh — 딱 화면 한 장, 스크롤하면 바로 섹션으로 */
+        .hero-wrapper {
+            position: relative;
+            height: 100vh;
+        }
+
+        /* Spline: sticky로 뷰포트에 고정 */
+        .spline-sticky {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        /* ─── 블러 진입 효과 (pseudo-element) ─── */
+        .spline-sticky::after {
+            content: '';
+            position: absolute; inset: 0;
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            background: rgba(252, 252, 252, 0.5);
+            z-index: 3;
+            pointer-events: none;
+            opacity: 1;
+            transition: opacity 1.4s cubic-bezier(0.4, 0, 0.2, 1),
+                        backdrop-filter 1.4s ease,
+                        -webkit-backdrop-filter 1.4s ease;
+        }
+        /* 블러 해제 클래스 */
+        .spline-sticky.blur-lifted::after {
+            opacity: 0;
+            backdrop-filter: blur(0px);
+            -webkit-backdrop-filter: blur(0px);
+        }
+
+        .spline-sticky iframe {
+            width: 100%; height: 100%;
+            border: none;
+            transform: scale(1.01);
+            cursor: pointer;
+            touch-action: none;
+        }
+
+        /* 히어로 텍스트 */
         .hero-content {
-            position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%) translateZ(0);
-            z-index: 2; text-align: center; pointer-events: none;
+            position: absolute;
+            top: 50vh; left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+            text-align: center;
+            pointer-events: none;
         }
-        .hero-content h1 { font-family: 'Playfair Display', serif; font-size: 5rem; color: var(--primary-dark); line-height: 1.1; margin-bottom: 20px; text-shadow: 0 0 30px rgba(255,255,255,1); }
-        .hero-content p { font-size: 1.1rem; letter-spacing: 2px; color: var(--accent-green); font-weight: 300; }
+        .hero-content h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 5rem; color: var(--primary-dark);
+            line-height: 1.1; margin-bottom: 20px;
+            text-shadow: 0 0 30px rgba(255,255,255,1);
+        }
+        .hero-content p {
+            font-size: 1.1rem; letter-spacing: 2px;
+            color: var(--accent-green); font-weight: 300;
+        }
 
-        .scroll-indicator { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 2; font-size: 0.7rem; letter-spacing: 3px; color: #aaa; text-transform: uppercase; }
+        /* 스크롤 인디케이터 */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 40px;
+            left: 50%; transform: translateX(-50%);
+            z-index: 5;
+            font-size: 0.7rem; letter-spacing: 3px;
+            color: #aaa; text-transform: uppercase;
+            transition: opacity 0.3s;
+        }
+        .scroll-indicator::after {
+            content: '';
+            display: block;
+            width: 1px; height: 40px;
+            background: linear-gradient(to bottom, #aaa, transparent);
+            margin: 10px auto 0;
+            animation: scrollLine 1.6s ease-in-out infinite;
+        }
+        @keyframes scrollLine {
+            0% { transform: scaleY(0); transform-origin: top; opacity: 0; }
+            50% { transform: scaleY(1); transform-origin: top; opacity: 1; }
+            100% { transform: scaleY(1); transform-origin: bottom; opacity: 0; }
+        }
 
+        /* ══════════════════════════════════
+           ─── 스크롤 콘텐츠 섹션들 ───
+           ══════════════════════════════════ */
+
+        .sections-wrapper {
+            position: relative;
+            z-index: 10;
+            background: var(--bg-color);
+        }
+
+        .section {
+            padding: 120px 60px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* ─── 섹션 1: 브랜드 소개 ─── */
+        .section-intro {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+            border-top: 1px solid #e8e8e8;
+        }
+        .section-label {
+            font-size: 0.7rem; letter-spacing: 3px;
+            color: #aaa; text-transform: uppercase; margin-bottom: 20px;
+        }
+        .section-intro h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem; color: var(--primary-dark);
+            line-height: 1.2; margin-bottom: 24px;
+        }
+        .section-intro p {
+            font-size: 0.95rem; line-height: 2;
+            color: #666; font-weight: 300;
+        }
+        .intro-visual {
+            aspect-ratio: 4/5;
+            background: linear-gradient(135deg, #e8ece8 0%, #d4dbd4 100%);
+            border-radius: 2px;
+            position: relative;
+            overflow: hidden;
+        }
+        .intro-visual::after {
+            content: 'SOLUTE';
+            position: absolute; bottom: 30px; right: 30px;
+            font-family: 'Playfair Display', serif;
+            font-size: 0.75rem; letter-spacing: 4px;
+            color: rgba(74,93,78,0.4);
+        }
+
+        /* ─── 섹션 2: 특징 카드들 ─── */
+        .section-features {
+            border-top: 1px solid #e8e8e8;
+        }
+        .features-header { margin-bottom: 60px; }
+        .features-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem; color: var(--primary-dark);
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+        }
+        .feature-card {
+            padding: 40px 0;
+            border-top: 2px solid var(--accent-green);
+        }
+        .feature-number {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem; color: #f0f0f0;
+            margin-bottom: 16px; line-height: 1;
+        }
+        .feature-card h3 {
+            font-size: 1rem; letter-spacing: 1px;
+            color: var(--primary-dark); margin-bottom: 12px;
+        }
+        .feature-card p {
+            font-size: 0.85rem; line-height: 1.8;
+            color: #888; font-weight: 300;
+        }
+
+        /* ─── 섹션 3: CTA ─── */
+        .section-cta {
+            text-align: center;
+            padding: 160px 60px;
+            border-top: 1px solid #e8e8e8;
+        }
+        .section-cta .section-label { text-align: center; }
+        .section-cta h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem; color: var(--primary-dark);
+            margin-bottom: 40px; line-height: 1.15;
+        }
+        .cta-btn {
+            display: inline-block; padding: 18px 60px;
+            background: var(--primary-dark); color: #fff;
+            text-decoration: none; font-size: 0.8rem;
+            letter-spacing: 3px;
+            transition: background 0.3s, transform 0.3s;
+        }
+        .cta-btn:hover { background: var(--accent-green); transform: translateY(-2px); }
+
+        /* ─── 푸터 ─── */
+        footer {
+            padding: 40px 60px;
+            border-top: 1px solid #e8e8e8;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        footer .logo-small {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem; letter-spacing: 2px; color: #ccc;
+        }
+        footer p { font-size: 0.75rem; color: #ccc; letter-spacing: 1px; }
+
+        /* ─── 스크롤 reveal 애니메이션 ─── */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.9s ease, transform 0.9s ease;
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ─── 반응형 ─── */
         @media (max-width: 768px) {
             header { padding: 30px 25px; }
+            .section { padding: 80px 25px; }
             .hero-content h1 { font-size: 3rem; }
             nav a { margin-left: 20px; }
             .mini-cart { width: 250px; right: -10px; }
+            .section-intro { grid-template-columns: 1fr; gap: 40px; }
+            .section-intro h2 { font-size: 2.2rem; }
+            .features-grid { grid-template-columns: 1fr; gap: 20px; }
+            .section-cta h2 { font-size: 2.5rem; }
+            footer { flex-direction: column; gap: 10px; text-align: center; }
         }
     </style>
 </head>
 <body>
 
-<div id="loading-overlay">
-<div class="loading-text">SOLUTE</div>
-</div>
+<!-- 페이지 전환용 오버레이 (텍스트 없음) -->
+<div id="loading-overlay"></div>
 
+<!-- 헤더 -->
 <header>
-<a href="index.html" class="logo">Solute</a>
-
-<nav>
-<a href="shop.html">SHOP</a>
-<a href="./cart.html" id="cart-link">CART<span id="cart-count"></span></a>
-
-<div id="mini-cart" class="mini-cart">
-<div class="mini-cart-header">RECENTLY ADDED</div>
-<div id="mini-cart-list"></div>
-<a href="./cart.html" class="go-cart-btn">VIEW ALL CART</a>
-</div>
-</nav>
+    <a href="index.html" class="logo">Solute</a>
+    <nav>
+        <a href="shop.html">SHOP</a>
+        <a href="#">HOW TO BUILD</a>
+    </nav>
+    <nav>
+        <a href="#">ACCOUNT</a>
+        <a href="./cart.html" id="cart-link">CART<span id="cart-count"></span>
+            <div id="mini-cart" class="mini-cart">
+                <div class="mini-cart-header">RECENTLY ADDED</div>
+                <div id="mini-cart-list"></div>
+                <a href="./cart.html" class="go-cart-btn">VIEW ALL CART</a>
+            </div>
+        </a>
+    </nav>
 </header>
 
-<main class="hero-container">
+<!-- ═══ HERO — Spline 고정 배경 ═══ -->
+<div class="hero-wrapper">
 
-<div class="spline-background">
-<iframe src="https://my.spline.design/3dstackcopycopycopycopy-JmAuSYykJNAnClHAeAwUes9v-fDk/" frameborder="0"></iframe>
+    <!-- sticky Spline 컨테이너 -->
+    <div class="spline-sticky" id="spline-sticky">
+        <iframe
+            id="spline-iframe"
+            src="https://my.spline.design/3dstackcopycopycopycopy-JmAuSYykJNAnClHAeAwUes9v-fDk/"
+            frameborder="0">
+        </iframe>
+    </div>
+
+    <!-- 텍스트 오버레이 -->
+    <div class="hero-content">
+        <p>RECYCLE & MODULE</p>
+        <h1>Solute</h1>
+    </div>
+
+    <!-- 스크롤 유도 -->
+    <div class="scroll-indicator" id="scroll-indicator">Scroll to Explore</div>
+
 </div>
 
-<div class="hero-content">
-<p>RECYCLE & MODULE</p>
-<h1>Solute</h1>
+<!-- ═══ 스크롤 콘텐츠 ═══ -->
+<div class="sections-wrapper">
+
+    <!-- 섹션 1 -->
+    <div class="section section-intro reveal">
+        <div>
+            <p class="section-label">About Solute</p>
+            <h2>공간에 녹아드는<br>가구의 철학</h2>
+            <p>Solute는 재활용 소재와 모듈형 구조를 결합해<br>
+            환경과 공간 모두에 조화롭게 어우러지는 가구를 만듭니다.<br><br>
+            하나의 조각이 아닌, 공간과 삶에 용해(溶)되어<br>
+            그 자체로 자연스러운 존재가 되는 것이 우리의 목표입니다.</p>
+        </div>
+        <div class="intro-visual"></div>
+    </div>
+
+    <!-- 섹션 2 -->
+    <div class="section section-features">
+        <div class="features-header reveal">
+            <p class="section-label">Why Solute</p>
+            <h2>세 가지 핵심 가치</h2>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card reveal" style="transition-delay: 0s">
+                <div class="feature-number">01</div>
+                <h3>RECYCLE</h3>
+                <p>산업 폐기물과 재활용 소재를 선별하여 새로운 가구로 재탄생시킵니다. 버려지는 것들에서 아름다움을 발견합니다.</p>
+            </div>
+            <div class="feature-card reveal" style="transition-delay: 0.15s">
+                <div class="feature-number">02</div>
+                <h3>MODULE</h3>
+                <p>공간의 변화에 유연하게 대응하는 모듈형 구조. 삶의 방식이 달라져도 가구는 함께 진화합니다.</p>
+            </div>
+            <div class="feature-card reveal" style="transition-delay: 0.3s">
+                <div class="feature-number">03</div>
+                <h3>DISSOLVE</h3>
+                <p>억지로 존재를 드러내지 않습니다. 공간의 맥락을 읽고, 그 안에 자연스럽게 녹아드는 형태를 추구합니다.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 섹션 3: CTA -->
+    <div class="section-cta reveal">
+        <p class="section-label">Collection</p>
+        <h2>공간을 다시<br>상상하세요.</h2>
+        <a href="shop.html" class="cta-btn">EXPLORE SHOP</a>
+    </div>
+
+    <!-- 푸터 -->
+    <footer>
+        <div class="logo-small">Solute</div>
+        <p>© 2025 Solute. All rights reserved.</p>
+    </footer>
+
 </div>
-
-<div class="scroll-indicator">Scroll to Explore</div>
-
-</main>
 
 <script>
-
-let miniCartTimer;
-
-function updateCartStatus() {
-const cart = JSON.parse(localStorage.getItem('solute_cart')) || [];
-const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-const countElement = document.getElementById('cart-count');
-
-if (countElement) {
-countElement.innerText = totalCount > 0 ? `(${totalCount})` : "";
-}
-
-const miniCartList = document.getElementById('mini-cart-list');
-
-if (miniCartList && cart.length > 0) {
-
-const recentItems = [...cart].reverse().slice(0,3);
-
-miniCartList.innerHTML = recentItems.map(item=>`
-<div class="mini-item">
-<div class="mini-img" style="background-color:${item.color || '#eee'}"></div>
-<div class="mini-info">
-<h4>${item.name}</h4>
-<p>${item.price} (Qty:${item.quantity})</p>
-</div>
-</div>
-`).join('');
-
-}
-else{
-
-miniCartList.innerHTML='<p style="font-size:0.75rem;color:#ccc;margin-bottom:15px;">장바구니가 비어있습니다.</p>';
-
-}
-
-}
-
-
-
-function initCartHoverEvents(){
-
-const cartLink=document.getElementById('cart-link');
-const miniCart=document.getElementById('mini-cart');
-
-if(!cartLink || !miniCart) return;
-
-
-cartLink.addEventListener('mouseenter',()=>{
-
-clearTimeout(miniCartTimer);
-
-updateCartStatus();
-
-miniCart.classList.add('active');
-
-});
-
-
-cartLink.addEventListener('mouseleave',()=>{
-
-miniCartTimer=setTimeout(()=>{
-
-miniCart.classList.remove('active');
-
-},500);
-
-});
-
-
-miniCart.addEventListener('mouseenter',()=>{
-
-clearTimeout(miniCartTimer);
-
-});
-
-
-miniCart.addEventListener('mouseleave',()=>{
-
-miniCartTimer=setTimeout(()=>{
-
-miniCart.classList.remove('active');
-
-},500);
-
-});
-
-}
-
-
-
-const overlay=document.getElementById('loading-overlay');
-
-function handleTransition(url){
-
-overlay.classList.add('is-loading');
-
-setTimeout(()=>{
-
-window.location.href=url;
-
-},1000);
-
-}
-
-
-
-document.querySelectorAll('nav a').forEach(link=>{
-
-link.addEventListener('click',function(e){
-
-const targetUrl=this.getAttribute('href');
-
-if(targetUrl && targetUrl!=='#' && !targetUrl.includes('mailto')){
-
-e.preventDefault();
-
-handleTransition(targetUrl);
-
-}
-
-});
-
-});
-
-
-
-window.addEventListener('beforeunload',()=>{
-
-overlay.classList.add('is-loading');
-
-const start=Date.now();
-
-while(Date.now()-start<1000){}
-
-});
-
-
-
-window.addEventListener('load',()=>{
-
-updateCartStatus();
-
-initCartHoverEvents();
-
-});
-
-
-window.addEventListener('pageshow',()=>{
-
-overlay.classList.remove('is-loading');
-
-updateCartStatus();
-
-});
-
-
-/* ⭐ iOS spline iframe 이동 문제 해결 (추가된 부분) */
-
-setInterval(()=>{
-
-const iframe=document.querySelector('.spline-background iframe');
-
-if(!iframe) return;
-
-if(iframe.src.includes("shop.html")){
-
-window.location.href=iframe.src;
-
-}
-
-},500);
-
-if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-
-    const splineContainer = document.querySelector('.spline-background');
-
-    if (splineContainer) {
-
-        splineContainer.addEventListener('touchstart', function(e) {
-
-            e.preventDefault();
-            e.stopPropagation();
-
-            window.location.href = "shop.html";
-
-        }, { passive:false });
-
+    /* ─── 카트 ─── */
+    let miniCartTimer;
+
+    function updateCartStatus() {
+        const cart = JSON.parse(localStorage.getItem('solute_cart')) || [];
+        const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+        const countEl = document.getElementById('cart-count');
+        if (countEl) countEl.innerText = totalCount > 0 ? `(${totalCount})` : '';
+
+        const listEl = document.getElementById('mini-cart-list');
+        if (listEl) {
+            if (cart.length > 0) {
+                listEl.innerHTML = [...cart].reverse().slice(0, 3).map(item => `
+                    <div class="mini-item">
+                        <div class="mini-img" style="background-color:${item.color || '#eee'}"></div>
+                        <div class="mini-info">
+                            <h4>${item.name}</h4>
+                            <p>${item.price} (Qty:${item.quantity})</p>
+                        </div>
+                    </div>`).join('');
+            } else {
+                listEl.innerHTML = '<p style="font-size:0.75rem;color:#ccc;margin-bottom:15px;">장바구니가 비어있습니다.</p>';
+            }
+        }
     }
 
-}
+    function initCartHoverEvents() {
+        const cartLink = document.getElementById('cart-link');
+        const miniCart = document.getElementById('mini-cart');
+        if (!cartLink || !miniCart) return;
+        cartLink.addEventListener('mouseenter', () => { clearTimeout(miniCartTimer); updateCartStatus(); miniCart.classList.add('active'); });
+        cartLink.addEventListener('mouseleave', () => { miniCartTimer = setTimeout(() => miniCart.classList.remove('active'), 500); });
+        miniCart.addEventListener('mouseenter', () => clearTimeout(miniCartTimer));
+        miniCart.addEventListener('mouseleave', () => { miniCartTimer = setTimeout(() => miniCart.classList.remove('active'), 500); });
+    }
 
+    /* ─── 페이지 전환 (nav 클릭 시 흰 오버레이) ─── */
+    const overlay = document.getElementById('loading-overlay');
 
+    function handleTransition(url) {
+        overlay.classList.add('active');
+        setTimeout(() => { window.location.href = url; }, 500);
+    }
+
+    document.querySelectorAll('nav a, .cta-btn').forEach(link => {
+        link.addEventListener('click', function(e) {
+            const url = this.getAttribute('href');
+            if (url && url !== '#' && !url.includes('mailto')) {
+                e.preventDefault();
+                handleTransition(url);
+            }
+        });
+    });
+
+    /* ─── 블러 진입 효과 ─── */
+    /* 오버레이 없이 순수 blur만: iframe load 후 블러 서서히 해제 */
+    const splineSticky = document.getElementById('spline-sticky');
+    const splineIframe = document.getElementById('spline-iframe');
+    let blurLifted = false;
+
+    function liftBlur() {
+        if (blurLifted) return;
+        blurLifted = true;
+        splineSticky.classList.add('blur-lifted');
+    }
+
+    splineIframe.addEventListener('load', () => {
+        setTimeout(liftBlur, 600);
+    });
+
+    // 최대 5초 fallback
+    setTimeout(liftBlur, 5000);
+
+    /* ─── 스크롤 인디케이터 페이드 ─── */
+    const scrollIndicator = document.getElementById('scroll-indicator');
+    window.addEventListener('scroll', () => {
+        scrollIndicator.style.opacity = Math.max(0, 1 - window.scrollY / 120);
+    }, { passive: true });
+
+    /* ─── 섹션 reveal (IntersectionObserver) ─── */
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                revealObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+    /* ─── pageshow (뒤로가기 등) ─── */
+    window.addEventListener('pageshow', () => {
+        overlay.classList.remove('active');
+        updateCartStatus();
+    });
+
+    /* ─── iOS: Spline 터치 시 shop으로 이동 ─── */
+    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        const splineContainer = document.querySelector('.spline-sticky');
+        if (splineContainer) {
+            splineContainer.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                handleTransition('shop.html');
+            }, { passive: false });
+        }
+    }
+
+    /* ─── 초기화 ─── */
+    window.addEventListener('load', () => {
+        updateCartStatus();
+        initCartHoverEvents();
+    });
 </script>
 
 </body>

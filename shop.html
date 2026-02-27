@@ -13,157 +13,79 @@
             --text-muted: #888;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
-       .product-img {
-            width: 100% !important;
-            aspect-ratio: 1 / 1.2 !important;
-            margin-bottom: 20px !important;
-            background-color: transparent !important; 
-            display: block !important;
-            background-repeat: no-repeat !important;
-            background-position: center !important;
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -webkit-font-smoothing: antialiased; }
 
-            /* [고정] 이제 이 수치는 건드리지 마세요. 
-            이미지 자체의 여백을 조절해서 크기를 맞출 겁니다. */
-            background-size: 250% !important; 
-            
-            /* 3중 그림자 설정 유지 */
-            filter: 
-                drop-shadow(8px 15px 10px rgba(0, 0, 0, 0.08))
-                drop-shadow(15px 30px 20px rgba(0, 0, 0, 0.05))
-                drop-shadow(30px 50px 40px rgba(0, 0, 0, 0.03)) !important;
-            
-            transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
-        }
-
-        /* 마우스 올렸을 때 중복 방지 유지 및 크기만 변경 */
-        .product-item:hover .product-img {
-            background-size: 280% !important; /* 호버 시 약간 확대 */
-            transform: translateY(-10px);
-        }
-
-        body { 
+        body {
             background-color: var(--bg-color);
             font-family: 'Noto Sans KR', sans-serif;
             color: var(--primary-dark);
             overflow-x: hidden;
         }
 
-        /* 로딩 오버레이 */
+        /* ─── 페이지 전환 오버레이 ─── */
         #loading-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: #fcfcfc; display: flex; justify-content: center; align-items: center;
-            z-index: 99999; opacity: 0; visibility: hidden;
-            transition: opacity 0.2s ease-in-out;
-            font-family: 'Playfair Display', serif; letter-spacing: 3px;
+            background-color: #fcfcfc;
+            z-index: 99999;
+            opacity: 0; visibility: hidden; pointer-events: none;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
         }
-        #loading-overlay.is-loading { opacity: 1; visibility: visible; }
+        #loading-overlay.active { opacity: 1; visibility: visible; pointer-events: all; }
 
-        /* 헤더 스타일 */
+        /* ══════════════════════
+           ─── 헤더 (index 스타일) ───
+           ══════════════════════ */
         header {
-            position: fixed; top: 0; left: 0; width: 100%;
+            position: fixed; top: 0; width: 100%;
             display: flex; justify-content: space-between; align-items: center;
-            padding: 40px 60px; background-color: var(--bg-color);
-            z-index: 10000;
+            padding: 40px 60px; z-index: 10000;
+            /* index와 동일: background 없음, transform만 */
+            background-color: var(--bg-color);
+            transform: translateZ(0);
         }
 
-        .logo { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 600; letter-spacing: 3px; text-decoration: none; color: var(--primary-dark); }
-        
+        header nav:first-of-type { position: absolute; left: 50%; transform: translateX(-50%); }
+        .logo {
+            font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 600;
+            letter-spacing: 1px; text-decoration: none; color: var(--primary-dark);
+        }
         nav { display: flex; align-items: center; position: relative; }
-        #cart-link { position: relative; padding-bottom: 10px; margin-bottom: -10px; text-decoration: none; color: var(--primary-dark); margin-left: 40px; font-size: 0.85rem; font-weight: 500; }
-        nav a:not(#cart-link) { text-decoration: none; color: var(--primary-dark); font-size: 0.85rem; font-weight: 500; margin-left: 40px; }
+        #cart-link { position: relative; padding-bottom: 10px; margin-bottom: -10px; }
+        nav a {
+            text-decoration: none; color: var(--primary-dark);
+            margin-left: 20px; font-size: 0.85rem;
+            letter-spacing: 0px; font-weight: 400;
+        }
 
-        /* --- [공통] 미니 장바구니 팝업 CSS (정밀 조정 완료) --- */
+        /* ─── 미니카트 (index 스타일) ─── */
         .mini-cart {
-            position: absolute;
-            top: 40px; right: 0;
-            width: 280px;
-            background: #fff;
-            border: 1px solid #eee;
+            position: absolute; top: 40px; right: 0; width: 280px;
+            background: #fff; border: 1px solid #eee;
             box-shadow: 0 15px 40px rgba(0,0,0,0.1);
-            padding: 20px 0; 
-            z-index: 10001;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(10px);
+            padding: 20px; z-index: 10001;
+            opacity: 0; visibility: hidden; transform: translateY(10px);
             transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            text-align: left;
         }
-
         .mini-cart.active { opacity: 1; visibility: visible; transform: translateY(0); }
-
-        .mini-cart-header { 
-            margin: 0 20px 15px 20px; 
-            font-size: 0.7rem; 
-            letter-spacing: 1px; 
-            color: #aaa; 
-            border-bottom: 1px solid #f5f5f5; 
-            padding-bottom: 10px; 
-            text-transform: uppercase; 
-            text-align: left;
-        }
-
-        .mini-item { 
-            display: flex; 
-            align-items: center; 
-            gap: 12px; /* 이미지-텍스트 사이 간격을 촘촘하게 조정 */
-            margin: 0 20px 15px 20px; 
-            text-align: left;
-        }
-
+        .mini-cart-header { font-size: 0.7rem; letter-spacing: 1px; color: #aaa; margin-bottom: 15px; border-bottom: 1px solid #f5f5f5; padding-bottom: 10px; text-transform: uppercase; }
+        .mini-item { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
         .mini-img { width: 50px; height: 50px; background: #eee; border-radius: 2px; flex-shrink: 0; }
-        
-        .mini-info {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+        .mini-info h4 { font-size: 0.85rem; margin-bottom: 2px; font-weight: 500; color: var(--primary-dark); }
+        .mini-info p { font-size: 0.75rem; color: #888; }
+        .go-cart-btn {
+            display: block; width: 100%; padding: 12px;
+            background: var(--primary-dark); color: #fff !important;
+            text-align: center; font-size: 0.75rem; text-decoration: none;
+            letter-spacing: 1px; margin-top: 10px; margin-left: 0 !important;
         }
-
-        .mini-info h4 { 
-            font-size: 0.85rem; 
-            margin-bottom: 2px; 
-            font-weight: 500; 
-            color: var(--primary-dark); 
-            line-height: 1.2;
-        }
-
-        .mini-info p { 
-            font-size: 0.75rem; 
-            color: #888; 
-            line-height: 1.2;
-        }
-
-        .go-cart-btn { 
-            display: block; 
-            width: 240px !important; 
-            margin: 15px auto 0 auto !important; 
-            padding: 14px 0; 
-            background: var(--primary-dark); 
-            color: #fff !important; 
-            text-align: center; 
-            font-size: 0.75rem; 
-            text-decoration: none; 
-            letter-spacing: 1px;
-            border-radius: 2px;
-            box-sizing: border-box !important;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
         .go-cart-btn:hover { background: #333; }
 
-        #mini-cart-list p {
-            text-align: center;
-            padding: 10px 0 20px 0;
-            font-size: 0.75rem;
-            color: #ccc;
-        }
-
-        /* 샵 컨테이너 */
+        /* ─── 샵 컨테이너 ─── */
         .shop-container { padding: 160px 60px 80px; min-height: 100vh; transition: opacity 0.3s ease; }
-        h2 { font-family: 'Playfair Display', serif; font-size: 3.5rem; margin-bottom: 30px; }
+        h2 { font-family: 'Playfair Display', serif; font-size: 1.2rem; margin-bottom: 15px; }
 
-        /* 필터 버튼 */
+        /* ─── 필터 ─── */
         .filter-container { display: flex; gap: 30px; margin-bottom: 50px; }
         .filter-btn {
             background: none; border: none; cursor: pointer;
@@ -172,241 +94,223 @@
         }
         .filter-btn.active { color: var(--primary-dark); border-bottom: 2px solid var(--primary-dark); }
 
-        /* 상품 그리드 */
-        .product-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-            gap: 60px 40px; 
+        /* ─── 상품 그리드 ─── */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 60px 40px;
+        }
+        .product-item {
+            text-decoration: none; color: inherit; display: block;
+            cursor: pointer;
+            border-right: none;
+            background-image: repeating-linear-gradient(
+                to bottom,
+                #cccccc 0px,
+                #cccccc 6px,
+                transparent 6px,
+                transparent 16px
+            );
+            background-size: 2px 100%;
+            background-position: right center;
+            background-repeat: no-repeat;
+        }
+        .product-info { padding-left: 50px; }
+        .product-item:first-child {
+            background-image: repeating-linear-gradient(
+                to bottom,
+                #cccccc 0px,
+                #cccccc 6px,
+                transparent 6px,
+                transparent 16px
+            ),
+            repeating-linear-gradient(
+                to bottom,
+                #cccccc 0px,
+                #cccccc 6px,
+                transparent 6px,
+                transparent 16px
+            );
+            background-size: 2px 100%, 2px 100%;
+            background-position: right center, left center;
+            background-repeat: no-repeat;
         }
 
-        .product-item { 
-            text-decoration: none; color: inherit; display: block; 
-            transition: transform 0.4s ease; will-change: transform; cursor: pointer;
-        }
-        .product-item:hover { transform: translateY(-10px); }
-        
+        .product-item:first-child .product-info { padding-left: 50px; }
+
         .product-img {
-            width: 100% !important;
-            aspect-ratio: 1 / 1.2 !important;
-            margin-bottom: 20px !important;
-            background-color: transparent !important; 
-            display: block !important;
-            background-repeat: no-repeat !important;
-            background-position: center !important;
-
-            /* 요청하신 수치 적용 */
-            background-size: 300% !important; 
-            
-            /* [수정] 그림자를 3겹으로 쌓아 훨씬 묵직하고 선명하게 만듦 */
-            /* 1번: 제품 바로 밑의 짙은 선명한 그림자 */
-            /* 2번: 중간 거리의 부드러운 그림자 */
-            /* 3번: 멀리 퍼지는 은은한 햇빛 그림자 */
-            filter: 
-                drop-shadow(5px 10px 5px rgba(0, 0, 0, 0.15))
-                drop-shadow(15px 30px 20px rgba(0, 0, 0, 0.1))
-                drop-shadow(30px 50px 40px rgba(0, 0, 0, 0.05)) !important;
-            
-            transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
+            width: 100%;
+            aspect-ratio: 1 / 0.7;
+            margin-bottom: 0px;
+            background-color: transparent;
+            display: block;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 250%;
+            filter:
+                drop-shadow(5px 10px 5px rgba(0,0,0,0.15))
+                drop-shadow(15px 30px 20px rgba(0,0,0,0.1))
+                drop-shadow(30px 50px 40px rgba(0,0,0,0.05));
+            transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
         }
-
         .product-item:hover .product-img {
-            background-size: 345% !important; 
-            transform: translateY(-15px); /* 더 높이 띄워서 공간 확보 */
-            
-            /* 호버 시 그림자를 훨씬 더 길고 진하게 강조 */
-            filter: 
-                drop-shadow(8px 15px 10px rgba(0, 0, 0, 0.2))
-                drop-shadow(25px 50px 35px rgba(0, 0, 0, 0.15))
-                drop-shadow(50px 80px 60px rgba(0, 0, 0, 0.1)) !important;
+            background-size: 280%;
+            transform: translateY(-15px);
+            filter:
+                drop-shadow(8px 15px 10px rgba(0,0,0,0.2))
+                drop-shadow(25px 50px 35px rgba(0,0,0,0.15))
+                drop-shadow(50px 80px 60px rgba(0,0,0,0.1));
         }
-
-        .product-info h3 { font-size: 1.1rem; margin-bottom: 8px; font-weight: 500; }
-        .product-info p { color: var(--text-muted); font-size: 0.9rem; }
-
+        .product-info h3 { font-size: 0.9rem; margin-bottom: 8px; font-weight: 400; line-height: 0.5; }
+        .product-info p { color: var(--text-muted); font-size: 0.9rem; font-weight: 250; line-height: 1.5; }
         .item-hidden { display: none !important; }
 
+        /* ─── 반응형 ─── */
         @media (max-width: 768px) {
             header { padding: 30px 25px; }
-            nav a, #cart-link { margin-left: 20px; }
+            nav a { margin-left: 20px; }
             .shop-container { padding: 120px 25px 40px; }
             h2 { font-size: 2.2rem; }
             .mini-cart { width: 250px; right: -10px; }
-            .go-cart-btn { width: 210px !important; }
         }
     </style>
 </head>
 <body>
 
-    <div id="loading-overlay">SOLUTE</div>
+<div id="loading-overlay"></div>
 
-    <header>
-        <a href="./index.html" class="logo">Solute</a>
-        <nav>
-            <a href="./shop.html">SHOP</a>
-            <a href="./cart.html" id="cart-link">CART<span id="cart-count"></span></a>
-
+<header>
+    <a href="./index.html" class="logo">Solute</a>
+    <nav>
+        <a href="./shop.html">SHOP</a>
+        <a href="#">HOW TO BUILD</a>
+    </nav>
+    <nav>
+        <a href="#">ACCOUNT</a>
+        <a href="./cart.html" id="cart-link">CART<span id="cart-count"></span>
             <div id="mini-cart" class="mini-cart">
                 <div class="mini-cart-header">RECENTLY ADDED</div>
                 <div id="mini-cart-list"></div>
                 <a href="./cart.html" class="go-cart-btn">VIEW ALL CART</a>
             </div>
-        </nav>
-    </header>
+        </a>
+    </nav>
+</header>
 
-    <div class="shop-container">
-        <h2>Shop Essentials</h2>
+<div class="shop-container">
+    <h2>Shop > ALL</h2>
 
-        <div class="filter-container">
-            <button class="filter-btn active" id="btn-all" onclick="filterProduct('all')">ALL</button>
-            <button class="filter-btn" id="btn-acrylic" onclick="filterProduct('acrylic')">ACRYLIC</button>
-            <button class="filter-btn" id="btn-wood" onclick="filterProduct('wood')">WOOD</button>
-        </div>
-        
-        <div id="productGrid" class="product-grid">
-            <div class="product-item" data-category="acrylic" onclick="goToDetail('ab1')">
-                <div class="product-img" style="background-image: url('./assets/images/Acrylic Base.png');"></div>
-                <div class="product-info"><h3>Acrylic Base</h3><p>₩159,000</p></div>
-            </div>
-
-            <div class="product-item" data-category="acrylic" onclick="goToDetail('al1')">
-                <div class="product-img" style="background-image: url('./assets/images/Acrylic Layer.png');"></div>
-                <div class="product-info"><h3>Acrylic Layer</h3><p>₩139,000</p></div>
-            </div>
-
-            <div class="product-item" data-category="wood" onclick="goToDetail('wb1')">
-                <div class="product-img" style="background-image: url('./assets/images/Wood Base.png');"></div>
-                <div class="product-info"><h3>Wood Base</h3><p>₩149,000</p></div>
-            </div>
-
-            <div class="product-item" data-category="wood" onclick="goToDetail('wl1')">
-                <div class="product-img" style="background-image: url('./assets/images/Wood Layer.png');"></div>
-                <div class="product-info"><h3>Wood Layer</h3><p>₩129,000</p></div>
-            </div>
-        </div>
+    <div class="filter-container">
+        <button class="filter-btn active" id="btn-all" onclick="filterProduct('all')">ALL</button>
+        <button class="filter-btn" id="btn-acrylic" onclick="filterProduct('acrylic')">ACRYLIC</button>
+        <button class="filter-btn" id="btn-wood" onclick="filterProduct('wood')">WOOD</button>
     </div>
 
-    <script>
-        let miniCartTimer;
+    <div id="productGrid" class="product-grid">
+        <div class="product-item" data-category="acrylic" onclick="goToDetail('ab1')">
+            <div class="product-img" style="background-image: url('./assets/images/Acrylic Base.png');"></div>
+            <div class="product-info"><h3>Acrylic Base</h3><p>₩159,000</p></div>
+        </div>
+        <div class="product-item" data-category="acrylic" onclick="goToDetail('al1')">
+            <div class="product-img" style="background-image: url('./assets/images/Acrylic Layer.png');"></div>
+            <div class="product-info"><h3>Acrylic Layer</h3><p>₩139,000</p></div>
+        </div>
+        <div class="product-item" data-category="wood" onclick="goToDetail('wb1')">
+            <div class="product-img" style="background-image: url('./assets/images/Wood Base.png');"></div>
+            <div class="product-info"><h3>Wood Base</h3><p>₩149,000</p></div>
+        </div>
+        <div class="product-item" data-category="wood" onclick="goToDetail('wl1')">
+            <div class="product-img" style="background-image: url('./assets/images/Wood Layer.png');"></div>
+            <div class="product-info"><h3>Wood Layer</h3><p>₩129,000</p></div>
+        </div>
+    </div>
+</div>
 
-        function updateCartStatus() {
-            const cart = JSON.parse(localStorage.getItem('solute_cart')) || [];
-            const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-            const countElement = document.getElementById('cart-count');
-            if (countElement) {
-                countElement.innerText = totalCount > 0 ? `(${totalCount})` : "";
-            }
+<script>
+    let miniCartTimer;
 
-            const miniCartList = document.getElementById('mini-cart-list');
-            if (miniCartList) {
-                if (cart.length > 0) {
-                    const recentItems = [...cart].reverse().slice(0, 3);
-                    miniCartList.innerHTML = recentItems.map(item => `
-                        <div class="mini-item">
-                            <div class="mini-img" style="background-color: ${item.color || '#eee'}"></div>
-                            <div class="mini-info">
-                                <h4>${item.name}</h4>
-                                <p>${item.price} (Qty: ${item.quantity})</p>
-                            </div>
+    function updateCartStatus() {
+        const cart = JSON.parse(localStorage.getItem('solute_cart')) || [];
+        const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+        const countEl = document.getElementById('cart-count');
+        if (countEl) countEl.innerText = totalCount > 0 ? `(${totalCount})` : '';
+
+        const listEl = document.getElementById('mini-cart-list');
+        if (listEl) {
+            if (cart.length > 0) {
+                listEl.innerHTML = [...cart].reverse().slice(0, 3).map(item => `
+                    <div class="mini-item">
+                        <div class="mini-img" style="background-color:${item.color || '#eee'}"></div>
+                        <div class="mini-info">
+                            <h4>${item.name}</h4>
+                            <p>${item.price} (Qty:${item.quantity})</p>
                         </div>
-                    `).join('');
-                } else {
-                    miniCartList.innerHTML = '<p>장바구니가 비어있습니다.</p>';
-                }
+                    </div>`).join('');
+            } else {
+                listEl.innerHTML = '<p style="font-size:0.75rem;color:#ccc;text-align:center;padding:10px 0 20px;">장바구니가 비어있습니다.</p>';
             }
         }
+    }
 
-        function initCartHoverEvents() {
-            const cartLink = document.getElementById('cart-link');
-            const miniCart = document.getElementById('mini-cart');
+    function initCartHoverEvents() {
+        const cartLink = document.getElementById('cart-link');
+        const miniCart = document.getElementById('mini-cart');
+        if (!cartLink || !miniCart) return;
+        cartLink.addEventListener('mouseenter', () => { clearTimeout(miniCartTimer); updateCartStatus(); miniCart.classList.add('active'); });
+        cartLink.addEventListener('mouseleave', () => { miniCartTimer = setTimeout(() => miniCart.classList.remove('active'), 500); });
+        miniCart.addEventListener('mouseenter', () => clearTimeout(miniCartTimer));
+        miniCart.addEventListener('mouseleave', () => { miniCartTimer = setTimeout(() => miniCart.classList.remove('active'), 500); });
+    }
 
-            if (!cartLink || !miniCart) return;
+    /* ─── 페이지 전환 ─── */
+    const overlay = document.getElementById('loading-overlay');
 
-            cartLink.addEventListener('mouseenter', () => {
-                clearTimeout(miniCartTimer);
-                updateCartStatus();
-                miniCart.classList.add('active');
-            });
+    function handleTransition(url) {
+        overlay.classList.add('active');
+        setTimeout(() => { window.location.href = url; }, 500);
+    }
 
-            cartLink.addEventListener('mouseleave', () => {
-                miniCartTimer = setTimeout(() => {
-                    miniCart.classList.remove('active');
-                }, 500);
-            });
-
-            miniCart.addEventListener('mouseenter', () => {
-                clearTimeout(miniCartTimer);
-            });
-
-            miniCart.addEventListener('mouseleave', () => {
-                miniCartTimer = setTimeout(() => {
-                    miniCart.classList.remove('active');
-                }, 500);
-            });
-        }
-
-        function goToDetail(id) {
-            const overlay = document.getElementById('loading-overlay');
-            const shopContainer = document.querySelector('.shop-container');
-            const targetUrl = `./product-detail.html?id=${id}`;
-
-            if (shopContainer) shopContainer.style.opacity = '0';
-            if (overlay) overlay.classList.add('is-loading');
-
-            setTimeout(() => {
-                window.location.href = targetUrl;
-            }, 400);
-        }
-
-        function filterProduct(category) {
-            const items = document.querySelectorAll('.product-item');
-            const btns = document.querySelectorAll('.filter-btn');
-
-            btns.forEach(btn => {
-                btn.classList.toggle('active', btn.id === 'btn-' + category);
-            });
-
-            items.forEach(item => {
-                const itemCat = item.getAttribute('data-category');
-                if (category === 'all' || itemCat === category) {
-                    item.classList.remove('item-hidden');
-                } else {
-                    item.classList.add('item-hidden');
-                }
-            });
-        }
-
-        window.addEventListener('load', () => {
-            updateCartStatus();
-            initCartHoverEvents();
-            
-            const urlParams = new URLSearchParams(window.location.search);
-            const initialFilter = urlParams.get('filter') || 'all';
-            filterProduct(initialFilter.toLowerCase());
-            
-            const overlay = document.getElementById('loading-overlay');
-            if (overlay) overlay.classList.remove('is-loading');
-        });
-
-        // 뒤로가기 시 하얀 화면 방지 및 상태 초기화
-        window.addEventListener('pageshow', (event) => {
-            const overlay = document.getElementById('loading-overlay');
-            const shopContainer = document.querySelector('.shop-container');
-
-            // 1. 장바구니 상태 최신화
-            updateCartStatus();
-
-            // 2. 뒤로가기로 왔을 때 (event.persisted가 true인 경우 포함)
-            // 오버레이를 강제로 숨기고 컨테이너 투명도를 복구합니다.
-            if (overlay) {
-                overlay.classList.remove('is-loading');
-                overlay.style.opacity = '0';
-                overlay.style.visibility = 'hidden';
-            }
-            
-            if (shopContainer) {
-                shopContainer.style.opacity = '1';
+    // nav 링크 전환
+    document.querySelectorAll('nav a, .logo').forEach(link => {
+        link.addEventListener('click', function(e) {
+            const url = this.getAttribute('href');
+            if (url && url !== '#' && !url.includes('mailto')) {
+                e.preventDefault();
+                handleTransition(url);
             }
         });
-    </script>
+    });
+
+    function goToDetail(id) {
+        const shopContainer = document.querySelector('.shop-container');
+        if (shopContainer) shopContainer.style.opacity = '0';
+        overlay.classList.add('active');
+        setTimeout(() => { window.location.href = `./product-detail.html?id=${id}`; }, 400);
+    }
+
+    function filterProduct(category) {
+        document.querySelector('h2').innerText = 'SHOP   >   ' + category.toUpperCase();
+        const items = document.querySelectorAll('.product-item');
+        const btns = document.querySelectorAll('.filter-btn');
+        btns.forEach(btn => btn.classList.toggle('active', btn.id === 'btn-' + category));
+        items.forEach(item => {
+            const cat = item.getAttribute('data-category');
+            item.classList.toggle('item-hidden', category !== 'all' && cat !== category);
+        });
+    }
+
+    window.addEventListener('load', () => {
+        updateCartStatus();
+        initCartHoverEvents();
+        const filter = new URLSearchParams(window.location.search).get('filter') || 'all';
+        filterProduct(filter.toLowerCase());
+    });
+
+    window.addEventListener('pageshow', () => {
+        overlay.classList.remove('active');
+        document.querySelector('.shop-container').style.opacity = '1';
+        updateCartStatus();
+    });
+</script>
 </body>
 </html>
