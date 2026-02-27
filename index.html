@@ -25,7 +25,6 @@
             font-family: 'Noto Sans KR', sans-serif;
         }
 
-        /* ─── 페이지 전환 오버레이 (로딩 텍스트 없음, 전환시만 사용) ─── */
         #loading-overlay {
             position: fixed; top: 0; left: 0;
             width: 100%; height: 100%;
@@ -57,6 +56,53 @@
             letter-spacing: 0px; font-weight: 400;
         }
 
+        /* ─── 햄버거 버튼 ─── */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            gap: 5px;
+            cursor: pointer;
+            margin-left: 20px;
+            padding: 4px;
+        }
+        .hamburger span {
+            display: block;
+            width: 22px; height: 1.5px;
+            background-color: var(--primary-dark);
+            transition: all 0.3s ease;
+        }
+        .hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+        .hamburger.open span:nth-child(2) { opacity: 0; }
+        .hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+        /* ─── 모바일 메뉴 ─── */
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: var(--bg-color);
+            z-index: 9999;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-end;
+            padding-top: 100px;
+            padding-right: 25px;
+            gap: 30px;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+        .mobile-menu.open { opacity: 1; visibility: visible; }
+        .mobile-menu a {
+            text-decoration: none;
+            color: var(--primary-dark);
+            font-size: 0.85rem;
+            letter-spacing: 0px;
+            font-weight: 400;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
         /* ─── 미니카트 ─── */
         .mini-cart {
             position: absolute; top: 40px; right: 0; width: 280px;
@@ -80,63 +126,35 @@
             letter-spacing: 1px; margin-top: 10px; margin-left: 0 !important;
         }
 
-        /* ══════════════════════════════════
-           ─── HERO — Spline 고정 배경 ───
-           ══════════════════════════════════ */
-
-        /* hero-wrapper: 100vh — 딱 화면 한 장, 스크롤하면 바로 섹션으로 */
-        .hero-wrapper {
-            position: relative;
-            height: 100vh;
-        }
-
-        /* Spline: sticky로 뷰포트에 고정 */
+        /* ─── HERO ─── */
+        .hero-wrapper { position: relative; height: 100vh; }
         .spline-sticky {
-            position: sticky;
-            top: 0;
-            width: 100%;
-            height: 100vh;
-            z-index: 1;
-            overflow: hidden;
+            position: sticky; top: 0;
+            width: 100%; height: 100vh;
+            z-index: 1; overflow: hidden;
         }
-
-        /* ─── 블러 진입 효과 (pseudo-element) ─── */
         .spline-sticky::after {
             content: '';
             position: absolute; inset: 0;
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
             background: rgba(252, 252, 252, 0.5);
-            z-index: 3;
-            pointer-events: none;
-            opacity: 1;
+            z-index: 3; pointer-events: none; opacity: 1;
             transition: opacity 1.4s cubic-bezier(0.4, 0, 0.2, 1),
                         backdrop-filter 1.4s ease,
                         -webkit-backdrop-filter 1.4s ease;
         }
-        /* 블러 해제 클래스 */
         .spline-sticky.blur-lifted::after {
-            opacity: 0;
-            backdrop-filter: blur(0px);
-            -webkit-backdrop-filter: blur(0px);
+            opacity: 0; backdrop-filter: blur(0px); -webkit-backdrop-filter: blur(0px);
         }
-
         .spline-sticky iframe {
-            width: 100%; height: 100%;
-            border: none;
-            transform: scale(1.01);
-            cursor: pointer;
-            touch-action: none;
+            width: 100%; height: 100%; border: none;
+            transform: scale(1.01); cursor: pointer; touch-action: none;
         }
-
-        /* 히어로 텍스트 */
         .hero-content {
-            position: absolute;
-            top: 50vh; left: 50%;
+            position: absolute; top: 50vh; left: 50%;
             transform: translate(-50%, -50%);
-            z-index: 5;
-            text-align: center;
-            pointer-events: none;
+            z-index: 5; text-align: center; pointer-events: none;
         }
         .hero-content h1 {
             font-family: 'Playfair Display', serif;
@@ -144,24 +162,15 @@
             line-height: 1.1; margin-bottom: 20px;
             text-shadow: 0 0 30px rgba(255,255,255,1);
         }
-        .hero-content p {
-            font-size: 1.1rem; letter-spacing: 2px;
-            color: var(--accent-green); font-weight: 300;
-        }
-
-        /* 스크롤 인디케이터 */
+        .hero-content p { font-size: 1.1rem; letter-spacing: 2px; color: var(--accent-green); font-weight: 300; }
         .scroll-indicator {
-            position: absolute;
-            bottom: 40px;
+            position: absolute; bottom: 40px;
             left: 50%; transform: translateX(-50%);
-            z-index: 5;
-            font-size: 0.7rem; letter-spacing: 3px;
-            color: #aaa; text-transform: uppercase;
-            transition: opacity 0.3s;
+            z-index: 5; font-size: 0.7rem; letter-spacing: 3px;
+            color: #aaa; text-transform: uppercase; transition: opacity 0.3s;
         }
         .scroll-indicator::after {
-            content: '';
-            display: block;
+            content: ''; display: block;
             width: 1px; height: 40px;
             background: linear-gradient(to bottom, #aaa, transparent);
             margin: 10px auto 0;
@@ -173,141 +182,48 @@
             100% { transform: scaleY(1); transform-origin: bottom; opacity: 0; }
         }
 
-        /* ══════════════════════════════════
-           ─── 스크롤 콘텐츠 섹션들 ───
-           ══════════════════════════════════ */
-
-        .sections-wrapper {
-            position: relative;
-            z-index: 10;
-            background: var(--bg-color);
-        }
-
-        .section {
-            padding: 120px 60px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        /* ─── 섹션 1: 브랜드 소개 ─── */
+        /* ─── 섹션들 ─── */
+        .sections-wrapper { position: relative; z-index: 10; background: var(--bg-color); }
+        .section { padding: 120px 60px; max-width: 1200px; margin: 0 auto; }
         .section-intro {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 80px;
-            align-items: center;
-            border-top: 1px solid #e8e8e8;
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 80px; align-items: center; border-top: 1px solid #e8e8e8;
         }
-        .section-label {
-            font-size: 0.7rem; letter-spacing: 3px;
-            color: #aaa; text-transform: uppercase; margin-bottom: 20px;
-        }
-        .section-intro h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 3rem; color: var(--primary-dark);
-            line-height: 1.2; margin-bottom: 24px;
-        }
-        .section-intro p {
-            font-size: 0.95rem; line-height: 2;
-            color: #666; font-weight: 300;
-        }
-        .intro-visual {
-            aspect-ratio: 4/5;
-            background: linear-gradient(135deg, #e8ece8 0%, #d4dbd4 100%);
-            border-radius: 2px;
-            position: relative;
-            overflow: hidden;
-        }
-        .intro-visual::after {
-            content: 'SOLUTE';
-            position: absolute; bottom: 30px; right: 30px;
-            font-family: 'Playfair Display', serif;
-            font-size: 0.75rem; letter-spacing: 4px;
-            color: rgba(74,93,78,0.4);
-        }
-
-        /* ─── 섹션 2: 특징 카드들 ─── */
-        .section-features {
-            border-top: 1px solid #e8e8e8;
-        }
+        .section-label { font-size: 0.7rem; letter-spacing: 3px; color: #aaa; text-transform: uppercase; margin-bottom: 20px; }
+        .section-intro h2 { font-family: 'Playfair Display', serif; font-size: 3rem; color: var(--primary-dark); line-height: 1.2; margin-bottom: 24px; }
+        .section-intro p { font-size: 0.95rem; line-height: 2; color: #666; font-weight: 300; }
+        .intro-visual { aspect-ratio: 4/5; background: linear-gradient(135deg, #e8ece8 0%, #d4dbd4 100%); border-radius: 2px; position: relative; overflow: hidden; }
+        .intro-visual::after { content: 'SOLUTE'; position: absolute; bottom: 30px; right: 30px; font-family: 'Playfair Display', serif; font-size: 0.75rem; letter-spacing: 4px; color: rgba(74,93,78,0.4); }
+        .section-features { border-top: 1px solid #e8e8e8; }
         .features-header { margin-bottom: 60px; }
-        .features-header h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.5rem; color: var(--primary-dark);
-        }
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 40px;
-        }
-        .feature-card {
-            padding: 40px 0;
-            border-top: 2px solid var(--accent-green);
-        }
-        .feature-number {
-            font-family: 'Playfair Display', serif;
-            font-size: 3rem; color: #f0f0f0;
-            margin-bottom: 16px; line-height: 1;
-        }
-        .feature-card h3 {
-            font-size: 1rem; letter-spacing: 1px;
-            color: var(--primary-dark); margin-bottom: 12px;
-        }
-        .feature-card p {
-            font-size: 0.85rem; line-height: 1.8;
-            color: #888; font-weight: 300;
-        }
-
-        /* ─── 섹션 3: CTA ─── */
-        .section-cta {
-            text-align: center;
-            padding: 160px 60px;
-            border-top: 1px solid #e8e8e8;
-        }
+        .features-header h2 { font-family: 'Playfair Display', serif; font-size: 2.5rem; color: var(--primary-dark); }
+        .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
+        .feature-card { padding: 40px 0; border-top: 2px solid var(--accent-green); }
+        .feature-number { font-family: 'Playfair Display', serif; font-size: 3rem; color: #f0f0f0; margin-bottom: 16px; line-height: 1; }
+        .feature-card h3 { font-size: 1rem; letter-spacing: 1px; color: var(--primary-dark); margin-bottom: 12px; }
+        .feature-card p { font-size: 0.85rem; line-height: 1.8; color: #888; font-weight: 300; }
+        .section-cta { text-align: center; padding: 160px 60px; border-top: 1px solid #e8e8e8; }
         .section-cta .section-label { text-align: center; }
-        .section-cta h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 4rem; color: var(--primary-dark);
-            margin-bottom: 40px; line-height: 1.15;
-        }
-        .cta-btn {
-            display: inline-block; padding: 18px 60px;
-            background: var(--primary-dark); color: #fff;
-            text-decoration: none; font-size: 0.8rem;
-            letter-spacing: 3px;
-            transition: background 0.3s, transform 0.3s;
-        }
+        .section-cta h2 { font-family: 'Playfair Display', serif; font-size: 4rem; color: var(--primary-dark); margin-bottom: 40px; line-height: 1.15; }
+        .cta-btn { display: inline-block; padding: 18px 60px; background: var(--primary-dark); color: #fff; text-decoration: none; font-size: 0.8rem; letter-spacing: 3px; transition: background 0.3s, transform 0.3s; }
         .cta-btn:hover { background: var(--accent-green); transform: translateY(-2px); }
-
-        /* ─── 푸터 ─── */
-        footer {
-            padding: 40px 60px;
-            border-top: 1px solid #e8e8e8;
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        footer .logo-small {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.2rem; letter-spacing: 2px; color: #ccc;
-        }
+        footer { padding: 40px 60px; border-top: 1px solid #e8e8e8; display: flex; justify-content: space-between; align-items: center; }
+        footer .logo-small { font-family: 'Playfair Display', serif; font-size: 1.2rem; letter-spacing: 2px; color: #ccc; }
         footer p { font-size: 0.75rem; color: #ccc; letter-spacing: 1px; }
-
-        /* ─── 스크롤 reveal 애니메이션 ─── */
-        .reveal {
-            opacity: 0;
-            transform: translateY(40px);
-            transition: opacity 0.9s ease, transform 0.9s ease;
-        }
-        .reveal.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        .reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.9s ease, transform 0.9s ease; }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
 
         /* ─── 반응형 ─── */
         @media (max-width: 768px) {
             header { padding: 30px 25px; }
-            .section { padding: 80px 25px; }
-            .hero-content h1 { font-size: 3rem; }
+            header nav:first-of-type { display: none; }
+            .hamburger { display: flex; }
+            .mobile-menu { display: flex; }
+            .desktop-only { display: none; }
             nav a { margin-left: 20px; }
             .mini-cart { width: 250px; right: -10px; }
+            .section { padding: 80px 25px; }
+            .hero-content h1 { font-size: 3rem; }
             .section-intro { grid-template-columns: 1fr; gap: 40px; }
             .section-intro h2 { font-size: 2.2rem; }
             .features-grid { grid-template-columns: 1fr; gap: 20px; }
@@ -318,18 +234,24 @@
 </head>
 <body>
 
-<!-- 페이지 전환용 오버레이 (텍스트 없음) -->
 <div id="loading-overlay"></div>
 
-<!-- 헤더 -->
+<!-- 모바일 메뉴 -->
+<div class="mobile-menu" id="mobile-menu">
+    <a href="./shop.html">Shop</a>
+    <a href="#">How to Build</a>
+    <a href="#">Login</a>
+    <a href="#">About</a>
+</div>
+
 <header>
     <a href="index.html" class="logo">Solute</a>
     <nav>
         <a href="shop.html">SHOP</a>
-<!--수정 <a href="#">HOW TO BUILD</a>-->
+        <a href="#">HOW TO BUILD</a>
     </nav>
     <nav>
-        <a href="#">ACCOUNT</a>
+        <a href="#" class="desktop-only">ACCOUNT</a>
         <a href="./cart.html" id="cart-link">CART<span id="cart-count"></span>
             <div id="mini-cart" class="mini-cart">
                 <div class="mini-cart-header">RECENTLY ADDED</div>
@@ -337,36 +259,26 @@
                 <a href="./cart.html" class="go-cart-btn">VIEW ALL CART</a>
             </div>
         </a>
+        <div class="hamburger" id="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
     </nav>
 </header>
 
-<!-- ═══ HERO — Spline 고정 배경 ═══ -->
 <div class="hero-wrapper">
-
-    <!-- sticky Spline 컨테이너 -->
     <div class="spline-sticky" id="spline-sticky">
-        <iframe
-            id="spline-iframe"
-            src="https://my.spline.design/3dstackcopycopycopycopy-JmAuSYykJNAnClHAeAwUes9v-fDk/"
-            frameborder="0">
-        </iframe>
+        <iframe id="spline-iframe" src="https://my.spline.design/3dstackcopycopycopycopy-JmAuSYykJNAnClHAeAwUes9v-fDk/" frameborder="0"></iframe>
     </div>
-
-    <!-- 텍스트 오버레이 -->
     <div class="hero-content">
         <p>RECYCLE & MODULE</p>
         <h1>Solute</h1>
     </div>
-
-    <!-- 스크롤 유도 -->
     <div class="scroll-indicator" id="scroll-indicator">Scroll to Explore</div>
-
 </div>
 
-<!-- ═══ 스크롤 콘텐츠 ═══ -->
 <div class="sections-wrapper">
-
-    <!-- 섹션 1 -->
     <div class="section section-intro reveal">
         <div>
             <p class="section-label">About Solute</p>
@@ -378,8 +290,6 @@
         </div>
         <div class="intro-visual"></div>
     </div>
-
-    <!-- 섹션 2 -->
     <div class="section section-features">
         <div class="features-header reveal">
             <p class="section-label">Why Solute</p>
@@ -403,24 +313,18 @@
             </div>
         </div>
     </div>
-
-    <!-- 섹션 3: CTA -->
     <div class="section-cta reveal">
         <p class="section-label">Collection</p>
         <h2>공간을 다시<br>상상하세요.</h2>
         <a href="shop.html" class="cta-btn">EXPLORE SHOP</a>
     </div>
-
-    <!-- 푸터 -->
     <footer>
         <div class="logo-small">Solute</div>
         <p>© 2025 Solute. All rights reserved.</p>
     </footer>
-
 </div>
 
 <script>
-    /* ─── 카트 ─── */
     let miniCartTimer;
 
     function updateCartStatus() {
@@ -428,7 +332,6 @@
         const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
         const countEl = document.getElementById('cart-count');
         if (countEl) countEl.innerText = totalCount > 0 ? `(${totalCount})` : '';
-
         const listEl = document.getElementById('mini-cart-list');
         if (listEl) {
             if (cart.length > 0) {
@@ -456,7 +359,25 @@
         miniCart.addEventListener('mouseleave', () => { miniCartTimer = setTimeout(() => miniCart.classList.remove('active'), 500); });
     }
 
-    /* ─── 페이지 전환 (nav 클릭 시 흰 오버레이) ─── */
+    /* ─── 햄버거 메뉴 ─── */
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    hamburger.addEventListener('click', () => {
+        hamburger.classList.toggle('open');
+        mobileMenu.classList.toggle('open');
+        document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+    });
+
+    mobileMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            hamburger.classList.remove('open');
+            mobileMenu.classList.remove('open');
+            document.body.style.overflow = '';
+        });
+    });
+
+    /* ─── 페이지 전환 ─── */
     const overlay = document.getElementById('loading-overlay');
 
     function handleTransition(url) {
@@ -464,7 +385,7 @@
         setTimeout(() => { window.location.href = url; }, 500);
     }
 
-    document.querySelectorAll('nav a, .cta-btn').forEach(link => {
+    document.querySelectorAll('nav a, .cta-btn, .mobile-menu a').forEach(link => {
         link.addEventListener('click', function(e) {
             const url = this.getAttribute('href');
             if (url && url !== '#' && !url.includes('mailto')) {
@@ -474,8 +395,7 @@
         });
     });
 
-    /* ─── 블러 진입 효과 ─── */
-    /* 오버레이 없이 순수 blur만: iframe load 후 블러 서서히 해제 */
+    /* ─── 블러 진입 ─── */
     const splineSticky = document.getElementById('spline-sticky');
     const splineIframe = document.getElementById('spline-iframe');
     let blurLifted = false;
@@ -486,54 +406,38 @@
         splineSticky.classList.add('blur-lifted');
     }
 
-    splineIframe.addEventListener('load', () => {
-        setTimeout(liftBlur, 600);
-    });
-
-    // 최대 5초 fallback
+    splineIframe.addEventListener('load', () => { setTimeout(liftBlur, 600); });
     setTimeout(liftBlur, 5000);
 
-    /* ─── 스크롤 인디케이터 페이드 ─── */
+    /* ─── 스크롤 인디케이터 ─── */
     const scrollIndicator = document.getElementById('scroll-indicator');
     window.addEventListener('scroll', () => {
         scrollIndicator.style.opacity = Math.max(0, 1 - window.scrollY / 120);
     }, { passive: true });
 
-    /* ─── 섹션 reveal (IntersectionObserver) ─── */
+    /* ─── reveal ─── */
     const revealObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-                revealObserver.unobserve(entry.target);
-            }
+            if (entry.isIntersecting) { entry.target.classList.add('visible'); revealObserver.unobserve(entry.target); }
         });
     }, { threshold: 0.12 });
-
     document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
-    /* ─── pageshow (뒤로가기 등) ─── */
-    window.addEventListener('pageshow', () => {
-        overlay.classList.remove('active');
-        updateCartStatus();
-    });
+    /* ─── pageshow ─── */
+    window.addEventListener('pageshow', () => { overlay.classList.remove('active'); updateCartStatus(); });
 
-    /* ─── iOS: Spline 터치 시 shop으로 이동 ─── */
+    /* ─── iOS Spline ─── */
     if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
         const splineContainer = document.querySelector('.spline-sticky');
         if (splineContainer) {
             splineContainer.addEventListener('touchstart', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
+                e.preventDefault(); e.stopPropagation();
                 handleTransition('shop.html');
             }, { passive: false });
         }
     }
 
-    /* ─── 초기화 ─── */
-    window.addEventListener('load', () => {
-        updateCartStatus();
-        initCartHoverEvents();
-    });
+    window.addEventListener('load', () => { updateCartStatus(); initCartHoverEvents(); });
 </script>
 
 </body>

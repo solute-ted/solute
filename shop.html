@@ -22,25 +22,6 @@
             overflow-x: hidden;
         }
 
-        @media (max-width: 768px) {
-            header nav:first-of-type { display: none; }
-        }
-
-        @media (max-width: 768px) {
-            .product-item {
-                background-image:
-                    repeating-linear-gradient(to bottom, #cccccc 0px, #cccccc 6px, transparent 6px, transparent 16px),
-                    repeating-linear-gradient(to bottom, #cccccc 0px, #cccccc 6px, transparent 6px, transparent 16px) !important;
-                background-size:
-                    2px calc(100% - 10px),
-                    2px calc(100% - 10px) !important;
-                background-position:
-                    right 5px,
-                    left 5px !important;
-                background-repeat: no-repeat !important;
-            }
-        }
-
         /* ─── 페이지 전환 오버레이 ─── */
         #loading-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -51,18 +32,14 @@
         }
         #loading-overlay.active { opacity: 1; visibility: visible; pointer-events: all; }
 
-        /* ══════════════════════
-           ─── 헤더 (index 스타일) ───
-           ══════════════════════ */
+        /* ─── 헤더 ─── */
         header {
             position: fixed; top: 0; width: 100%;
             display: flex; justify-content: space-between; align-items: center;
             padding: 40px 60px; z-index: 10000;
-            /* index와 동일: background 없음, transform만 */
             background-color: var(--bg-color);
             transform: translateZ(0);
         }
-
         header nav:first-of-type { position: absolute; left: 50%; transform: translateX(-50%); }
         .logo {
             font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 600;
@@ -76,7 +53,60 @@
             letter-spacing: 0px; font-weight: 400;
         }
 
-        /* ─── 미니카트 (index 스타일) ─── */
+        /* ─── 햄버거 버튼 (모바일 전용, 기본 숨김) ─── */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            gap: 5px;
+            cursor: pointer;
+            margin-left: 20px;
+            padding: 4px;
+        }
+        .hamburger span {
+            display: block;
+            width: 22px;
+            height: 1.5px;
+            background-color: var(--primary-dark);
+            transition: all 0.3s ease;
+        }
+        /* 열렸을 때 X로 변환 */
+        .hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+        .hamburger.open span:nth-child(2) { opacity: 0; }
+        .hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+        /* ─── 모바일 드롭다운 메뉴 ─── */
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: var(--bg-color);
+            z-index: 9999;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-end;  /* 오른쪽 정렬 */
+            padding-top: 100px;
+            padding-right: 25px;    /* 헤더 padding과 맞춤 */
+            gap: 30px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+        .mobile-menu.open {
+            opacity: 1;
+            visibility: visible;
+        }
+        .mobile-menu a {
+            text-decoration: none;
+            color: var(--primary-dark);
+            font-size: 0.85rem;      /* cart와 동일 */
+            letter-spacing: 0px;     /* cart와 동일 */
+            font-weight: 400;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        /* ─── 미니카트 ─── */
         .mini-cart {
             position: absolute; top: 40px; right: 0; width: 280px;
             background: #fff; border: 1px solid #eee;
@@ -123,38 +153,20 @@
             text-decoration: none; color: inherit; display: block;
             cursor: pointer;
             border-right: none;
-            background-image: repeating-linear-gradient(
-                to bottom,
-                #cccccc 0px,
-                #cccccc 6px,
-                transparent 6px,
-                transparent 16px
-            );
+            background-image: repeating-linear-gradient(to bottom, #cccccc 0px, #cccccc 6px, transparent 6px, transparent 16px);
             background-size: 2px 100%;
             background-position: right center;
             background-repeat: no-repeat;
         }
         .product-info { padding-left: 50px; }
         .product-item:first-child {
-            background-image: repeating-linear-gradient(
-                to bottom,
-                #cccccc 0px,
-                #cccccc 6px,
-                transparent 6px,
-                transparent 16px
-            ),
-            repeating-linear-gradient(
-                to bottom,
-                #cccccc 0px,
-                #cccccc 6px,
-                transparent 6px,
-                transparent 16px
-            );
+            background-image:
+                repeating-linear-gradient(to bottom, #cccccc 0px, #cccccc 6px, transparent 6px, transparent 16px),
+                repeating-linear-gradient(to bottom, #cccccc 0px, #cccccc 6px, transparent 6px, transparent 16px);
             background-size: 2px 100%, 2px 100%;
             background-position: right center, left center;
             background-repeat: no-repeat;
         }
-
         .product-item:first-child .product-info { padding-left: 50px; }
 
         .product-img {
@@ -187,10 +199,31 @@
         /* ─── 반응형 ─── */
         @media (max-width: 768px) {
             header { padding: 30px 25px; }
+            header nav:first-of-type { display: none; }
+            /* PC용 오른쪽 nav 숨김 */
+            header nav:last-of-type .desktop-only { display: none; }
+
+            /* 모바일에서 CART만 보이고 햄버거 보이게 */
+            .hamburger { display: flex; }
+            .mobile-menu { display: flex; }
+
             nav a { margin-left: 20px; }
-            .shop-container { padding: 120px 25px 40px; }
-            h2 { font-size: 2.2rem; }
+            .shop-container { padding: 100px 25px 40px; }
+            h2 { font-size: 1.2rem; }
             .mini-cart { width: 250px; right: -10px; }
+
+            .product-item {
+                background-image:
+                    repeating-linear-gradient(to bottom, #cccccc 0px, #cccccc 6px, transparent 6px, transparent 16px),
+                    repeating-linear-gradient(to bottom, #cccccc 0px, #cccccc 6px, transparent 6px, transparent 16px) !important;
+                background-size:
+                    2px calc(100% - 10px),
+                    2px calc(100% - 10px) !important;
+                background-position:
+                    right 5px,
+                    left 5px !important;
+                background-repeat: no-repeat !important;
+            }
         }
     </style>
 </head>
@@ -198,14 +231,27 @@
 
 <div id="loading-overlay"></div>
 
+<!-- 모바일 전체화면 메뉴 -->
+<div class="mobile-menu" id="mobile-menu">
+    <a href="./shop.html">Shop</a>
+    <a href="#">How to Build</a>
+    <a href="#">Login</a>
+    <a href="#">About</a>
+</div>
+
 <header>
     <a href="./index.html" class="logo">Solute</a>
+
+    <!-- 가운데 nav (PC) -->
     <nav>
         <a href="./shop.html">SHOP</a>
         <a href="#">HOW TO BUILD</a>
     </nav>
+
+    <!-- 오른쪽 nav -->
     <nav>
-        <a href="#">ACCOUNT</a>
+        <!-- PC에서만 보이는 항목들 -->
+        <a href="#" class="desktop-only">ACCOUNT</a>
         <a href="./cart.html" id="cart-link">CART<span id="cart-count"></span>
             <div id="mini-cart" class="mini-cart">
                 <div class="mini-cart-header">RECENTLY ADDED</div>
@@ -213,6 +259,12 @@
                 <a href="./cart.html" class="go-cart-btn">VIEW ALL CART</a>
             </div>
         </a>
+        <!-- 모바일에서만 보이는 햄버거 -->
+        <div class="hamburger" id="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
     </nav>
 </header>
 
@@ -281,6 +333,25 @@
         miniCart.addEventListener('mouseleave', () => { miniCartTimer = setTimeout(() => miniCart.classList.remove('active'), 500); });
     }
 
+    /* ─── 햄버거 메뉴 ─── */
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    hamburger.addEventListener('click', () => {
+        hamburger.classList.toggle('open');
+        mobileMenu.classList.toggle('open');
+        document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+    });
+
+    /* 모바일 메뉴 링크 클릭 시 닫기 */
+    mobileMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            hamburger.classList.remove('open');
+            mobileMenu.classList.remove('open');
+            document.body.style.overflow = '';
+        });
+    });
+
     /* ─── 페이지 전환 ─── */
     const overlay = document.getElementById('loading-overlay');
 
@@ -289,8 +360,7 @@
         setTimeout(() => { window.location.href = url; }, 500);
     }
 
-    // nav 링크 전환
-    document.querySelectorAll('nav a, .logo').forEach(link => {
+    document.querySelectorAll('nav a, .logo, .mobile-menu a').forEach(link => {
         link.addEventListener('click', function(e) {
             const url = this.getAttribute('href');
             if (url && url !== '#' && !url.includes('mailto')) {
