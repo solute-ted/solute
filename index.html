@@ -213,6 +213,66 @@
         .reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.9s ease, transform 0.9s ease; }
         .reveal.visible { opacity: 1; transform: translateY(0); }
 
+        /* ─── POST GRID ─── */
+        .post-section {
+            padding: 80px 60px;
+            border-top: 1px solid #e8e8e8;
+        }
+        .post-section-header {
+            margin-bottom: 32px;
+        }
+        .post-section-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 8px;
+        }
+        .post-section-header p {
+            font-size: 0.82rem;
+            line-height: 1.9;
+            color: #888;
+            font-weight: 300;
+        }
+        .post-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        .post-grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+        .post-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .post-item img {
+            width: 100%;
+            display: block;
+            object-fit: cover;
+            aspect-ratio: 4/5;
+            margin-bottom: 16px;
+        }
+        .post-item-title {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 500;
+            letter-spacing: 0px;
+            text-transform: uppercase;
+            color: var(--primary-dark);
+            margin-bottom: 6px;
+        }
+        .post-item-desc {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 0.82rem;
+            line-height: 1.7;
+            color: var(--primary-dark);
+            font-weight: 300;
+        }
+
         /* ─── 반응형 ─── */
         @media (max-width: 768px) {
             header { padding: 30px 25px; }
@@ -229,6 +289,9 @@
             .features-grid { grid-template-columns: 1fr; gap: 20px; }
             .section-cta h2 { font-size: 2.5rem; }
             footer { flex-direction: column; gap: 10px; text-align: center; }
+            .post-section { padding: 60px 20px; }
+            .post-grid-3 { grid-template-columns: 1fr; }
+            .post-grid-2 { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -279,6 +342,19 @@
 </div>
 
 <div class="sections-wrapper">
+
+    <!-- ─── POST GRID: 3컬럼 ─── -->
+    <div class="post-section reveal">
+        <div class="post-grid-3">
+            <div class="post-item">
+                <img src="img/IMG_2017.JPG" alt="Solute build 01" />
+                <p class="post-item-title">This is how we built Solute</p>
+                <p class="post-item-desc">The first layer is composed of a Wood Base and Wood Door. The second layer features an Acrylic Layer (not an Acrylic Base) and Acrylic Door .</p>
+            </div>
+
+        </div>
+    </div>
+
     <div class="section section-intro reveal">
         <div>
             <p class="section-label">About Solute</p>
@@ -359,7 +435,6 @@
         miniCart.addEventListener('mouseleave', () => { miniCartTimer = setTimeout(() => miniCart.classList.remove('active'), 500); });
     }
 
-    /* ─── 햄버거 메뉴 ─── */
     const hamburger = document.getElementById('hamburger');
     const mobileMenu = document.getElementById('mobile-menu');
 
@@ -377,7 +452,6 @@
         });
     });
 
-    /* ─── 페이지 전환 ─── */
     const overlay = document.getElementById('loading-overlay');
 
     function handleTransition(url) {
@@ -395,7 +469,6 @@
         });
     });
 
-    /* ─── 블러 진입 ─── */
     const splineSticky = document.getElementById('spline-sticky');
     const splineIframe = document.getElementById('spline-iframe');
     let blurLifted = false;
@@ -409,24 +482,20 @@
     splineIframe.addEventListener('load', () => { setTimeout(liftBlur, 600); });
     setTimeout(liftBlur, 5000);
 
-    /* ─── 스크롤 인디케이터 ─── */
     const scrollIndicator = document.getElementById('scroll-indicator');
     window.addEventListener('scroll', () => {
         scrollIndicator.style.opacity = Math.max(0, 1 - window.scrollY / 120);
     }, { passive: true });
 
-    /* ─── reveal ─── */
     const revealObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) { entry.target.classList.add('visible'); revealObserver.unobserve(entry.target); }
         });
-    }, { threshold: 0.12 });
+    }, { threshold: 0.08 });
     document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
-    /* ─── pageshow ─── */
     window.addEventListener('pageshow', () => { overlay.classList.remove('active'); updateCartStatus(); });
 
-    /* ─── iOS Spline ─── */
     if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
         const splineContainer = document.querySelector('.spline-sticky');
         if (splineContainer) {
