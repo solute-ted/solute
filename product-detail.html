@@ -254,14 +254,8 @@
         document.title = `Solute | ${currentProduct.name}`;
 
         const mainImgElem = document.getElementById('mainImg');
-        mainImgElem.style.backgroundColor = "transparent";
-
-        const img = new Image();
-        img.src = currentProduct.img;
-        img.onload = function() {
-            mainImgElem.style.backgroundImage = `url('${currentProduct.img}')`;
-            mainImgElem.classList.add('loaded');
-        };
+        mainImgElem.style.backgroundImage = `url('${currentProduct.img}')`;
+        mainImgElem.classList.add('loaded');
     }
 
     function updateCartStatus() {
