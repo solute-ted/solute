@@ -105,7 +105,7 @@
 
         /* ─── 미니카트 ─── */
         .mini-cart {
-            position: absolute; top: 40px; right: 0; width: 280px;
+            position: absolute; top: 20px; right: 0; width: 280px;
             background: #fff; border: 1px solid #eee;
             box-shadow: 0 15px 40px rgba(0,0,0,0.1);
             padding: 20px; z-index: 10001;
@@ -163,6 +163,29 @@
             text-shadow: 0 0 30px rgba(255,255,255,1);
         }
         .hero-content p { font-size: 1.1rem; letter-spacing: 2px; color: var(--accent-green); font-weight: 300; }
+        .hero-shop-btn {
+            position: absolute;
+            top: calc(50vh + 50px);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 5;
+            text-decoration: none;
+            color: var(--primary-dark);
+            font-size: 0.78rem;
+            font-weight: 500;
+            letter-spacing: 3px;
+            border: 1px solid var(--primary-dark);
+            padding: 12px 32px;
+            background: transparent;
+            transition: background 0.3s, color 0.3s;
+            white-space: nowrap;
+            border-radius: 3px;
+        }
+        .hero-shop-btn:hover {
+            background: rgba(26, 26, 26, 0.15);
+            color: var(--primary-dark);
+        }
+
         .scroll-indicator {
             position: absolute; bottom: 40px;
             left: 50%; transform: translateX(-50%);
@@ -315,13 +338,12 @@
     </nav>
     <nav>
         <a href="#" class="desktop-only">ACCOUNT</a>
-        <a href="./cart.html" id="cart-link">CART<span id="cart-count"></span>
-            <div id="mini-cart" class="mini-cart">
-                <div class="mini-cart-header">RECENTLY ADDED</div>
-                <div id="mini-cart-list"></div>
-                <a href="./cart.html" class="go-cart-btn">VIEW ALL CART</a>
-            </div>
-        </a>
+        <a href="./cart.html" id="cart-link">CART<span id="cart-count"></span></a>
+        <div id="mini-cart" class="mini-cart">
+            <div class="mini-cart-header">RECENTLY ADDED</div>
+            <div id="mini-cart-list"></div>
+            <a href="./cart.html" class="go-cart-btn">VIEW ALL CART</a>
+        </div>
         <div class="hamburger" id="hamburger">
             <span></span>
             <span></span>
@@ -339,6 +361,7 @@
         <h1>Solute</h1>
     </div>
     <div class="scroll-indicator" id="scroll-indicator">Scroll to Explore</div>
+    <a href="shop.html" class="hero-shop-btn" id="hero-shop-btn">SHOP</a>
 </div>
 
 <div class="sections-wrapper">
@@ -465,7 +488,7 @@
         setTimeout(() => { window.location.href = url; }, 500);
     }
 
-    document.querySelectorAll('nav a, .cta-btn, .mobile-menu a').forEach(link => {
+    document.querySelectorAll('nav a, .cta-btn, .mobile-menu a, .hero-shop-btn').forEach(link => {
         link.addEventListener('click', function(e) {
             const url = this.getAttribute('href');
             if (url && url !== '#' && !url.includes('mailto')) {

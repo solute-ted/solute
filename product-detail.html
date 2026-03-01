@@ -5,53 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solute | Detail</title>
     <style>
-        #mainImg {
-            flex: 1; /* 왼쪽 영역을 차지하게 함 */
-            min-width: 500px; /* 최소 너비 확보 */
-            aspect-ratio: 1 / 1; /* 정사각형 비율 유지 (원하는 대로 조절 가능) */
-            
-            background-color: transparent !important;
-            background-size: 300% !important; /* 이미지 전체가 보이도록 함 */
-            background-position: center !important;
-            background-repeat: no-repeat !important;
-            
-            /* [핵심] 샵 페이지와 동일한 강력한 3중 햇빛 그림자 */
-            filter: 
-                drop-shadow(10px 20px 10px rgba(0, 0, 0, 0.15))
-                drop-shadow(30px 60px 40px rgba(0, 0, 0, 0.1))
-                drop-shadow(60px 100px 80px rgba(0, 0, 0, 0.05)) !important;
-            
-            opacity: 0;
-            transition: all 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
-            /* [추가] 배경과 자연스럽게 섞이도록 설정 */
-            mix-blend-mode: multiply; /* 흰색 배경인 경우 주변과 완벽히 동화됨 */
-            
-            /* [추가] 이미지 경계선을 아주 미세하게 흐리게 처리 (블럭 현상 방지) */
-            mask-image: radial-gradient(circle, black 70%, rgba(0,0,0,0) 100%);
-            -webkit-mask-image: radial-gradient(circle, black 70%, rgba(0,0,0,0) 100%);
-
-            /* 모바일에서 렌더링 성능 향상 */
-            will-change: transform, opacity;
-        }
-
-        /* 이미지가 로드되었을 때 나타나는 효과 */
-        #mainImg.loaded {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* 상세페이지 레이아웃 모바일 대응 */
-        @media (max-width: 768px) {
-            .product-detail-container {
-                padding: 20px;
-                overflow-x: hidden; /* 가로 스크롤 방지 */
-            }
-            
-            #mainImg {
-                background-size: 140% !important; /* 모바일 화면에 맞춰 크기 재조절 */
-                margin-top: -50px; /* 로고와 겹치지 않게 위치 조정 */
-            }
-        }
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;500&family=Playfair+Display:ital,wght@0,600;1,600&display=swap');
 
         :root {
@@ -61,7 +14,7 @@
             --accent-green: #4a5d4e;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
         
         body { 
             background-color: var(--bg-color);
@@ -70,96 +23,137 @@
             overflow-x: hidden;
         }
 
-        /* --- Header & Navigation --- */
+        /* ─── 로딩 오버레이 ─── */
+        #loading-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: var(--bg-color); z-index: 99999; 
+            display: flex; justify-content: center; align-items: center; 
+            transition: opacity 0.4s ease-in-out, visibility 0.4s; 
+            font-family: 'Playfair Display', serif; letter-spacing: 1px;
+        }
+        #loading-overlay.fade-out { opacity: 0; visibility: hidden; }
+
+        /* ─── 헤더 ─── */
         header {
-            position: fixed; top: 0; left: 0; width: 100%;
+            position: fixed; top: 0; width: 100%;
             display: flex; justify-content: space-between; align-items: center;
-            padding: 40px 60px; background-color: var(--bg-color);
-            z-index: 10000;
+            padding: 40px 60px; z-index: 10000;
+            background-color: var(--bg-color);
+            transform: translateZ(0);
         }
-
-        .logo { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 600; letter-spacing: 3px; text-decoration: none; color: var(--primary-dark); }
-        
+        header nav:first-of-type { position: absolute; left: 50%; transform: translateX(-50%); }
+        .logo {
+            font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 600;
+            letter-spacing: 1px; text-decoration: none; color: var(--primary-dark);
+        }
         nav { display: flex; align-items: center; position: relative; }
-        #cart-link { position: relative; padding-bottom: 10px; margin-bottom: -10px; text-decoration: none; color: var(--primary-dark); margin-left: 40px; font-size: 0.85rem; font-weight: 500; }
-        nav a:not(#cart-link) { text-decoration: none; color: var(--primary-dark); font-size: 0.85rem; font-weight: 500; margin-left: 40px; }
+        nav a {
+            text-decoration: none; color: var(--primary-dark);
+            margin-left: 20px; font-size: 0.85rem;
+            letter-spacing: 0px; font-weight: 400;
+        }
 
-        /* --- Mini Cart Popup --- */
-        #mini-cart-list p { text-align: center; padding: 10px 0 20px 0; }
-        
+        /* ─── 햄버거 버튼 ─── */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            gap: 5px;
+            cursor: pointer;
+            margin-left: 20px;
+            padding: 4px;
+        }
+        .hamburger span {
+            display: block;
+            width: 22px; height: 1.5px;
+            background-color: var(--primary-dark);
+            transition: all 0.3s ease;
+        }
+        .hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+        .hamburger.open span:nth-child(2) { opacity: 0; }
+        .hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+        /* ─── 모바일 메뉴 ─── */
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: var(--bg-color);
+            z-index: 9999;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-end;
+            padding-top: 100px;
+            padding-right: 25px;
+            gap: 30px;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+        .mobile-menu.open { opacity: 1; visibility: visible; }
+        .mobile-menu a {
+            text-decoration: none;
+            color: var(--primary-dark);
+            font-size: 0.85rem;
+            letter-spacing: 0px;
+            font-weight: 400;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        /* ─── 미니카트 ─── */
         .mini-cart {
-            position: absolute;
-            top: 40px; right: 0;
-            width: 280px;
-            background: #fff;
-            border: 1px solid #eee;
+            position: absolute; top: 20px; right: 0; width: 280px;
+            background: #fff; border: 1px solid #eee;
             box-shadow: 0 15px 40px rgba(0,0,0,0.1);
-            padding: 20px 0; 
-            z-index: 10001;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(10px);
+            padding: 20px; z-index: 10001;
+            opacity: 0; visibility: hidden; transform: translateY(10px);
             transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            text-align: left;
         }
-
         .mini-cart.active { opacity: 1; visibility: visible; transform: translateY(0); }
-
-        .mini-cart-header {
-            margin: 0 20px 15px 20px;
-            font-size: 0.7rem; 
-            letter-spacing: 1px; 
-            color: #aaa;
-            border-bottom: 1px solid #f5f5f5; 
-            padding-bottom: 10px;
-            text-transform: uppercase;
-        }
-
-        .mini-item { display: flex; align-items: center; gap: 15px; margin: 0 20px 15px 20px; }
+        .mini-cart-header { font-size: 0.7rem; letter-spacing: 1px; color: #aaa; margin-bottom: 15px; border-bottom: 1px solid #f5f5f5; padding-bottom: 10px; text-transform: uppercase; }
+        .mini-item { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
         .mini-img { width: 50px; height: 50px; background: #eee; border-radius: 2px; flex-shrink: 0; background-size: contain; background-position: center; background-repeat: no-repeat; }
         .mini-info h4 { font-size: 0.85rem; margin-bottom: 2px; font-weight: 500; }
         .mini-info p { font-size: 0.75rem; color: #888; }
-
         .go-cart-btn {
-            display: block;
-            width: 240px !important; 
-            margin: 15px auto 0 auto !important; 
-            padding: 14px 0;
-            background: var(--primary-dark);
-            color: #fff !important;
-            text-align: center;
-            text-decoration: none;
-            font-size: 0.75rem;
-            letter-spacing: 1px;
-            border-radius: 2px;
-            cursor: pointer;
+            display: block; width: 100%; padding: 12px;
+            background: var(--primary-dark); color: #fff !important;
+            text-align: center; font-size: 0.75rem; text-decoration: none;
+            letter-spacing: 1px; margin-top: 10px; margin-left: 0 !important;
         }
+        .go-cart-btn:hover { background: #333; }
 
-        /* --- Detail Layout --- */
+        /* ─── 상세 레이아웃 ─── */
         .detail-wrapper { 
             display: flex; padding: 180px 10% 80px; gap: 80px; 
             max-width: 1400px; margin: 0 auto; align-items: flex-start;
         }
 
-        /* [수정] PNG 이미지가 돋보이도록 개선된 이미지 영역 */
-        .detail-img-container img, 
-        .product-detail-img { /* 사용 중인 이미지 클래스명에 맞춰 적용하세요 */
+        #mainImg {
+            flex: 1;
             width: 100%;
-            height: auto;
-            background-color: transparent !important; /* 배경색 제거 필수 */
-            
-            /* [핵심] 샵 페이지와 동일한 3중 햇빛 그림자 */
+            min-width: 0;
+            aspect-ratio: 1 / 1;
+            background-color: transparent !important;
+            background-size: 300% !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
             filter: 
-                drop-shadow(5px 10px 5px rgba(0, 0, 0, 0.15))
-                drop-shadow(15px 30px 20px rgba(0, 0, 0, 0.1))
-                drop-shadow(30px 50px 40px rgba(0, 0, 0, 0.05)) !important;
-            
-            /* 상세 페이지는 보통 호버 효과를 넣지 않거나 아주 미세하게 넣습니다 */
-            transition: filter 0.6s ease;
+                drop-shadow(10px 20px 10px rgba(0,0,0,0.15))
+                drop-shadow(30px 60px 40px rgba(0,0,0,0.1))
+                drop-shadow(60px 100px 80px rgba(0,0,0,0.05)) !important;
+            opacity: 0;
+            transition: all 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
+            mix-blend-mode: multiply;
+            mask-image: radial-gradient(circle, black 70%, rgba(0,0,0,0) 100%);
+            -webkit-mask-image: radial-gradient(circle, black 70%, rgba(0,0,0,0) 100%);
+            will-change: transform, opacity;
         }
+        #mainImg.loaded { opacity: 1; transform: translateY(0); }
 
-        .detail-img.loaded {
-            opacity: 1;
-            animation: fadeInUp 1s ease forwards;
+        @media (min-width: 769px) {
+            #mainImg { min-width: 500px; }
         }
 
         .detail-info { flex: 1; position: sticky; top: 180px; }
@@ -178,196 +172,185 @@
         }
         .buy-btn:hover { opacity: 0.9; }
 
-        /* Loading Overlay */
-        #loading-overlay { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: var(--bg-color); z-index: 99999; 
-            display: flex; justify-content: center; align-items: center; 
-            transition: opacity 0.4s ease-in-out, visibility 0.4s; 
-            font-family: 'Playfair Display', serif; letter-spacing: 1px;
-        }
-        #loading-overlay.fade-out { opacity: 0; visibility: hidden; }
-
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        @media (max-width: 768px) { 
+        /* ─── 반응형 ─── */
+        @media (max-width: 768px) {
             header { padding: 30px 25px; }
-            nav a, #cart-link { margin-left: 20px; }
-            .detail-wrapper { flex-direction: column; padding: 120px 25px 60px; gap: 40px; } 
+            header nav:first-of-type { display: none; }
+            .hamburger { display: flex; }
+            .mobile-menu { display: flex; }
+            .desktop-only { display: none; }
+            nav a { margin-left: 20px; }
+            .mini-cart { width: 250px; right: -10px; }
+            .detail-wrapper { flex-direction: column; padding: 120px 25px 60px; gap: 40px; }
             .detail-info { position: static; }
             #productName { font-size: 2.5rem; }
-            .mini-cart { width: 240px; right: -10px; }
+            #mainImg {
+                min-width: unset;
+                background-size: 160% !important;
+            }
         }
     </style>
 </head>
 <body>
-    <div id="loading-overlay">SOLUTE</div>
 
-    <header>
-        <a href="./index.html" class="logo">Solute</a>
-        <nav>
-            <a href="./shop.html">SHOP</a>
-            <a href="./cart.html" id="cart-link">CART<span id="cart-count"></span></a>
+<div id="loading-overlay">SOLUTE</div>
 
-            <div id="mini-cart" class="mini-cart">
-                <div class="mini-cart-header">RECENTLY ADDED</div>
-                <div id="mini-cart-list"></div>
-                <a href="./cart.html" class="go-cart-btn">VIEW ALL CART</a>
-            </div>
-        </nav>
-    </header>
+<!-- 모바일 메뉴 -->
+<div class="mobile-menu" id="mobile-menu">
+    <a href="./shop.html">Shop</a>
+    <a href="#">How to Build</a>
+    <a href="#">Login</a>
+    <a href="#">About</a>
+</div>
 
-    <main class="detail-wrapper">
-        <div id="mainImg" class="detail-img"></div>
-        <div class="detail-info">
-            <span id="productCode">ITEM CODE</span>
-            <h1 id="productName">Loading...</h1>
-            <p id="productPrice">₩0</p>
-            <div class="desc">
-                Solute의 모듈러 가구 시리즈는 공간의 목적에 따라 자유롭게 확장 가능합니다. <br><br>
-                재생 아크릴과 지속 가능한 목재를 사용하여 환경과 디자인을 동시에 고려했습니다.
-            </div>
-            <button class="buy-btn" onclick="addToCart()">ADD TO CART</button>
+<header>
+    <a href="./index.html" class="logo">Solute</a>
+    <nav>
+        <a href="./shop.html">SHOP</a>
+        <a href="#">HOW TO BUILD</a>
+    </nav>
+    <nav>
+        <a href="#" class="desktop-only">ACCOUNT</a>
+        <a href="./cart.html" id="cart-link">CART<span id="cart-count"></span></a>
+        <div id="mini-cart" class="mini-cart">
+            <div class="mini-cart-header">RECENTLY ADDED</div>
+            <div id="mini-cart-list"></div>
+            <a href="./cart.html" class="go-cart-btn">VIEW ALL CART</a>
         </div>
-    </main>
+        <div class="hamburger" id="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </nav>
+</header>
 
-    <script>
-        // [수정] 상품 데이터에 이미지 경로(img) 추가
-        const products = {
-            "ab1": { name: "Acrylic Base", price: "₩159,000", color: "#f5f5f5", code: "AB1", img: "./assets/images/Acrylic Base.png" },
-            "al1": { name: "Acrylic Layer", price: "₩139,000", color: "#e8eef2", code: "AL1", img: "./assets/images/Acrylic Layer.png" },
-            "wb1": { name: "Wood Base", price: "₩149,000", color: "#f2e9e1", code: "WB1", img: "./assets/images/Wood Base.png" },
-            "wl1": { name: "Wood Layer", price: "₩129,000", color: "#ece0d1", code: "WL1", img: "./assets/images/Wood Layer.png" }
-        };
+<main class="detail-wrapper">
+    <div id="mainImg" class="detail-img"></div>
+    <div class="detail-info">
+        <span id="productCode">ITEM CODE</span>
+        <h1 id="productName">Loading...</h1>
+        <p id="productPrice">₩0</p>
+        <div class="desc">
+            Solute의 모듈러 가구 시리즈는 공간의 목적에 따라 자유롭게 확장 가능합니다. <br><br>
+            재생 아크릴과 지속 가능한 목재를 사용하여 환경과 디자인을 동시에 고려했습니다.
+        </div>
+        <button class="buy-btn" onclick="addToCart()">ADD TO CART</button>
+    </div>
+</main>
 
-        const params = new URLSearchParams(window.location.search);
-        const id = params.get('id');
-        let currentProduct = null;
-        let miniCartTimer;
+<script>
+    const products = {
+        "ab1": { name: "Acrylic Base",  price: "₩159,000", color: "#f5f5f5",  code: "AB1", img: "./assets/images/acrylic_base.png" },
+        "al1": { name: "Acrylic Layer", price: "₩139,000", color: "#e8eef2",  code: "AL1", img: "./assets/images/acrylic_layer.png" },
+        "wb1": { name: "Wood Base",     price: "₩149,000", color: "#f2e9e1",  code: "WB1", img: "./assets/images/wood_base.png" },
+        "wl1": { name: "Wood Layer",    price: "₩129,000", color: "#ece0d1",  code: "WL1", img: "./assets/images/wood_layer.png" }
+    };
 
-        if (id && products[id]) {
-            currentProduct = products[id];
-            document.getElementById('productCode').innerText = currentProduct.code;
-            document.getElementById('productName').innerText = currentProduct.name;
-            document.getElementById('productPrice').innerText = currentProduct.price;
-            
-            const mainImgElem = document.getElementById('mainImg');
-            
-            if (currentProduct.img) {
-                mainImgElem.style.backgroundImage = `url('${currentProduct.img}')`;
-                // mainImgElem.style.backgroundColor = currentProduct.color; // <- 이 줄을 주석 처리하거나 삭제하세요.
-                mainImgElem.style.backgroundColor = "transparent"; // 페이지 배경이 보이도록 투명 설정
-            } else {
-                mainImgElem.style.backgroundColor = "transparent";
-            }
-            
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    let currentProduct = null;
+    let miniCartTimer;
+
+    if (id && products[id]) {
+        currentProduct = products[id];
+        document.getElementById('productCode').innerText = currentProduct.code;
+        document.getElementById('productName').innerText = currentProduct.name;
+        document.getElementById('productPrice').innerText = currentProduct.price;
+        document.title = `Solute | ${currentProduct.name}`;
+
+        const mainImgElem = document.getElementById('mainImg');
+        mainImgElem.style.backgroundColor = "transparent";
+
+        const img = new Image();
+        img.src = currentProduct.img;
+        img.onload = function() {
+            mainImgElem.style.backgroundImage = `url('${currentProduct.img}')`;
             mainImgElem.classList.add('loaded');
-            document.title = `Solute | ${currentProduct.name}`;
-        }
-        function loadProductImage(currentProduct) {
-            const mainImgElem = document.getElementById('mainImg');
-            
-            // 1. 먼저 투명하게 만듦
-            mainImgElem.style.opacity = '0';
-            
-            const img = new Image();
-            img.src = currentProduct.img;
-            
-            // 2. 이미지가 메모리에 완전히 로드된 후 실행
-            img.onload = function() {
-                mainImgElem.style.backgroundImage = `url('${currentProduct.img}')`;
-                // 3. 부드럽게 나타나게 함 (transition 효과와 시너지)
-                mainImgElem.style.opacity = '1';
-            };
-        }
-        function updateCartStatus() {
-            const cart = JSON.parse(localStorage.getItem('solute_cart')) || [];
-            const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-            const countElement = document.getElementById('cart-count');
-            if (countElement) {
-                countElement.innerText = totalCount > 0 ? `(${totalCount})` : "";
-            }
+        };
+    }
 
-            const miniCartList = document.getElementById('mini-cart-list');
-            if (miniCartList) {
-                if (cart.length > 0) {
-                    const recentItems = [...cart].reverse().slice(0, 3);
-                    miniCartList.innerHTML = recentItems.map(item => `
-                        <div class="mini-item">
-                            <div class="mini-img" style="background-color: ${item.color}; background-image: url('${item.img || ''}')"></div>
-                            <div class="mini-info">
-                                <h4>${item.name}</h4>
-                                <p>${item.price} (Qty: ${item.quantity})</p>
-                            </div>
+    function updateCartStatus() {
+        const cart = JSON.parse(localStorage.getItem('solute_cart')) || [];
+        const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+        const countEl = document.getElementById('cart-count');
+        if (countEl) countEl.innerText = totalCount > 0 ? `(${totalCount})` : '';
+        const listEl = document.getElementById('mini-cart-list');
+        if (listEl) {
+            if (cart.length > 0) {
+                listEl.innerHTML = [...cart].reverse().slice(0, 3).map(item => `
+                    <div class="mini-item">
+                        <div class="mini-img" style="background-color:${item.color}; background-image:url('${item.img||''}')"></div>
+                        <div class="mini-info">
+                            <h4>${item.name}</h4>
+                            <p>${item.price} (Qty:${item.quantity})</p>
                         </div>
-                    `).join('');
-                } else {
-                    miniCartList.innerHTML = '<p style="font-size:0.75rem; color:#ccc; margin-bottom:15px;">장바구니가 비어있습니다.</p>';
-                }
+                    </div>`).join('');
+            } else {
+                listEl.innerHTML = '<p style="font-size:0.75rem;color:#ccc;margin-bottom:15px;">장바구니가 비어있습니다.</p>';
             }
         }
+    }
 
-        function initCartHoverEvents() {
-            const cartLink = document.getElementById('cart-link');
-            const miniCart = document.getElementById('mini-cart');
-            if (!cartLink || !miniCart) return;
+    function initCartHoverEvents() {
+        const cartLink = document.getElementById('cart-link');
+        const miniCart = document.getElementById('mini-cart');
+        if (!cartLink || !miniCart) return;
+        cartLink.addEventListener('mouseenter', () => { clearTimeout(miniCartTimer); updateCartStatus(); miniCart.classList.add('active'); });
+        cartLink.addEventListener('mouseleave', () => { miniCartTimer = setTimeout(() => miniCart.classList.remove('active'), 500); });
+        miniCart.addEventListener('mouseenter', () => clearTimeout(miniCartTimer));
+        miniCart.addEventListener('mouseleave', () => { miniCartTimer = setTimeout(() => miniCart.classList.remove('active'), 500); });
+    }
 
-            cartLink.addEventListener('mouseenter', () => {
-                clearTimeout(miniCartTimer);
-                updateCartStatus();
-                miniCart.classList.add('active');
-            });
-            cartLink.addEventListener('mouseleave', () => {
-                miniCartTimer = setTimeout(() => { miniCart.classList.remove('active'); }, 500);
-            });
-            miniCart.addEventListener('mouseenter', () => { clearTimeout(miniCartTimer); });
-            miniCart.addEventListener('mouseleave', () => {
-                miniCartTimer = setTimeout(() => { miniCart.classList.remove('active'); }, 500);
-            });
-        }
+    /* ─── 햄버거 메뉴 ─── */
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobile-menu');
 
-        function addToCart() {
-            if (!currentProduct) return;
-            const itemToAdd = {
-                id: id,
-                name: currentProduct.name,
-                price: currentProduct.price,
-                code: currentProduct.code,
-                color: currentProduct.color,
-                img: currentProduct.img || "", // 이미지 경로 추가 저장
-                quantity: 1
-            };
+    hamburger.addEventListener('click', () => {
+        hamburger.classList.toggle('open');
+        mobileMenu.classList.toggle('open');
+        document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
+    });
 
-            let cart = JSON.parse(localStorage.getItem('solute_cart')) || [];
-            const existingIndex = cart.findIndex(item => item.id === id);
-            if (existingIndex > -1) { cart[existingIndex].quantity += 1; } 
-            else { cart.push(itemToAdd); }
-
-            localStorage.setItem('solute_cart', JSON.stringify(cart));
-            updateCartStatus(); 
-
-            const miniCart = document.getElementById('mini-cart');
-            miniCart.classList.add('active');
-            clearTimeout(miniCartTimer);
-            miniCartTimer = setTimeout(() => {
-                if (!miniCart.matches(':hover') && !document.getElementById('cart-link').matches(':hover')) {
-                    miniCart.classList.remove('active');
-                }
-            }, 3000);
-        }
-
-        window.addEventListener('load', () => {
-            updateCartStatus();
-            initCartHoverEvents();
-            setTimeout(() => {
-                document.getElementById('loading-overlay').classList.add('fade-out');
-            }, 300);
+    mobileMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            hamburger.classList.remove('open');
+            mobileMenu.classList.remove('open');
+            document.body.style.overflow = '';
         });
+    });
 
-        window.addEventListener('pageshow', updateCartStatus);
-    </script>
+    function addToCart() {
+        if (!currentProduct) return;
+        let cart = JSON.parse(localStorage.getItem('solute_cart')) || [];
+        const existingIndex = cart.findIndex(item => item.id === id);
+        if (existingIndex > -1) { cart[existingIndex].quantity += 1; }
+        else { cart.push({ id, name: currentProduct.name, price: currentProduct.price, code: currentProduct.code, color: currentProduct.color, img: currentProduct.img || '', quantity: 1 }); }
+        localStorage.setItem('solute_cart', JSON.stringify(cart));
+        updateCartStatus();
+
+        const miniCart = document.getElementById('mini-cart');
+        miniCart.classList.add('active');
+        clearTimeout(miniCartTimer);
+        miniCartTimer = setTimeout(() => {
+            if (!miniCart.matches(':hover') && !document.getElementById('cart-link').matches(':hover')) {
+                miniCart.classList.remove('active');
+            }
+        }, 3000);
+    }
+
+    window.addEventListener('load', () => {
+        updateCartStatus();
+        initCartHoverEvents();
+        setTimeout(() => { document.getElementById('loading-overlay').classList.add('fade-out'); }, 300);
+    });
+
+    window.addEventListener('pageshow', updateCartStatus);
+</script>
 </body>
 </html>

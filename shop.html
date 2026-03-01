@@ -22,7 +22,6 @@
             overflow-x: hidden;
         }
 
-        /* ─── 페이지 전환 오버레이 ─── */
         #loading-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: #fcfcfc;
@@ -53,7 +52,7 @@
             letter-spacing: 0px; font-weight: 400;
         }
 
-        /* ─── 햄버거 버튼 (모바일 전용, 기본 숨김) ─── */
+        /* ─── 햄버거 버튼 ─── */
         .hamburger {
             display: none;
             flex-direction: column;
@@ -65,17 +64,15 @@
         }
         .hamburger span {
             display: block;
-            width: 22px;
-            height: 1.5px;
+            width: 22px; height: 1.5px;
             background-color: var(--primary-dark);
             transition: all 0.3s ease;
         }
-        /* 열렸을 때 X로 변환 */
         .hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
         .hamburger.open span:nth-child(2) { opacity: 0; }
         .hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
 
-        /* ─── 모바일 드롭다운 메뉴 ─── */
+        /* ─── 모바일 메뉴 ─── */
         .mobile-menu {
             display: none;
             position: fixed;
@@ -85,30 +82,26 @@
             z-index: 9999;
             flex-direction: column;
             justify-content: flex-start;
-            align-items: flex-end;  /* 오른쪽 정렬 */
+            align-items: flex-end;
             padding-top: 100px;
-            padding-right: 25px;    /* 헤더 padding과 맞춤 */
+            padding-right: 25px;
             gap: 30px;
-            opacity: 0;
-            visibility: hidden;
+            opacity: 0; visibility: hidden;
             transition: opacity 0.4s ease, visibility 0.4s ease;
         }
-        .mobile-menu.open {
-            opacity: 1;
-            visibility: visible;
-        }
+        .mobile-menu.open { opacity: 1; visibility: visible; }
         .mobile-menu a {
             text-decoration: none;
             color: var(--primary-dark);
-            font-size: 0.85rem;      /* cart와 동일 */
-            letter-spacing: 0px;     /* cart와 동일 */
+            font-size: 0.85rem;
+            letter-spacing: 0px;
             font-weight: 400;
             font-family: 'Noto Sans KR', sans-serif;
         }
 
         /* ─── 미니카트 ─── */
         .mini-cart {
-            position: absolute; top: 40px; right: 0; width: 280px;
+            position: absolute; top: 20px; right: 0; width: 280px;
             background: #fff; border: 1px solid #eee;
             box-shadow: 0 15px 40px rgba(0,0,0,0.1);
             padding: 20px; z-index: 10001;
@@ -200,18 +193,13 @@
         @media (max-width: 768px) {
             header { padding: 30px 25px; }
             header nav:first-of-type { display: none; }
-            /* PC용 오른쪽 nav 숨김 */
             header nav:last-of-type .desktop-only { display: none; }
-
-            /* 모바일에서 CART만 보이고 햄버거 보이게 */
             .hamburger { display: flex; }
             .mobile-menu { display: flex; }
-
             nav a { margin-left: 20px; }
             .shop-container { padding: 100px 25px 40px; }
             h2 { font-size: 1.2rem; }
             .mini-cart { width: 250px; right: -10px; }
-
             .product-item {
                 background-image:
                     repeating-linear-gradient(to bottom, #cccccc 0px, #cccccc 6px, transparent 6px, transparent 16px),
@@ -231,7 +219,6 @@
 
 <div id="loading-overlay"></div>
 
-<!-- 모바일 전체화면 메뉴 -->
 <div class="mobile-menu" id="mobile-menu">
     <a href="./shop.html">Shop</a>
     <a href="#">How to Build</a>
@@ -241,25 +228,18 @@
 
 <header>
     <a href="./index.html" class="logo">Solute</a>
-
-    <!-- 가운데 nav (PC) -->
     <nav>
         <a href="./shop.html">SHOP</a>
         <a href="#">HOW TO BUILD</a>
     </nav>
-
-    <!-- 오른쪽 nav -->
     <nav>
-        <!-- PC에서만 보이는 항목들 -->
         <a href="#" class="desktop-only">ACCOUNT</a>
-        <a href="./cart.html" id="cart-link">CART<span id="cart-count"></span>
-            <div id="mini-cart" class="mini-cart">
-                <div class="mini-cart-header">RECENTLY ADDED</div>
-                <div id="mini-cart-list"></div>
-                <a href="./cart.html" class="go-cart-btn">VIEW ALL CART</a>
-            </div>
-        </a>
-        <!-- 모바일에서만 보이는 햄버거 -->
+        <a href="./cart.html" id="cart-link">CART<span id="cart-count"></span></a>
+        <div id="mini-cart" class="mini-cart">
+            <div class="mini-cart-header">RECENTLY ADDED</div>
+            <div id="mini-cart-list"></div>
+            <a href="./cart.html" class="go-cart-btn">VIEW ALL CART</a>
+        </div>
         <div class="hamburger" id="hamburger">
             <span></span>
             <span></span>
@@ -279,19 +259,19 @@
 
     <div id="productGrid" class="product-grid">
         <div class="product-item" data-category="acrylic" onclick="goToDetail('ab1')">
-            <div class="product-img" style="background-image: url('./assets/images/Acrylic Base.png');"></div>
+            <div class="product-img" style="background-image: url('./assets/images/acrylic_base.png');"></div>
             <div class="product-info"><h3>Acrylic Base</h3><p>₩159,000</p></div>
         </div>
         <div class="product-item" data-category="acrylic" onclick="goToDetail('al1')">
-            <div class="product-img" style="background-image: url('./assets/images/Acrylic Layer.png');"></div>
+            <div class="product-img" style="background-image: url('./assets/images/acrylic_layer.png');"></div>
             <div class="product-info"><h3>Acrylic Layer</h3><p>₩139,000</p></div>
         </div>
         <div class="product-item" data-category="wood" onclick="goToDetail('wb1')">
-            <div class="product-img" style="background-image: url('./assets/images/Wood Base.png');"></div>
+            <div class="product-img" style="background-image: url('./assets/images/wood_base.png');"></div>
             <div class="product-info"><h3>Wood Base</h3><p>₩149,000</p></div>
         </div>
         <div class="product-item" data-category="wood" onclick="goToDetail('wl1')">
-            <div class="product-img" style="background-image: url('./assets/images/Wood Layer.png');"></div>
+            <div class="product-img" style="background-image: url('./assets/images/wood_layer.png');"></div>
             <div class="product-info"><h3>Wood Layer</h3><p>₩129,000</p></div>
         </div>
     </div>
@@ -305,7 +285,6 @@
         const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
         const countEl = document.getElementById('cart-count');
         if (countEl) countEl.innerText = totalCount > 0 ? `(${totalCount})` : '';
-
         const listEl = document.getElementById('mini-cart-list');
         if (listEl) {
             if (cart.length > 0) {
@@ -333,7 +312,6 @@
         miniCart.addEventListener('mouseleave', () => { miniCartTimer = setTimeout(() => miniCart.classList.remove('active'), 500); });
     }
 
-    /* ─── 햄버거 메뉴 ─── */
     const hamburger = document.getElementById('hamburger');
     const mobileMenu = document.getElementById('mobile-menu');
 
@@ -343,7 +321,6 @@
         document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
     });
 
-    /* 모바일 메뉴 링크 클릭 시 닫기 */
     mobileMenu.querySelectorAll('a').forEach(link => {
         link.addEventListener('click', () => {
             hamburger.classList.remove('open');
@@ -352,7 +329,6 @@
         });
     });
 
-    /* ─── 페이지 전환 ─── */
     const overlay = document.getElementById('loading-overlay');
 
     function handleTransition(url) {
