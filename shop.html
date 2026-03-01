@@ -347,10 +347,7 @@
     });
 
     function goToDetail(id) {
-        const shopContainer = document.querySelector('.shop-container');
-        if (shopContainer) shopContainer.style.opacity = '0';
-        overlay.classList.add('active');
-        setTimeout(() => { window.location.href = `./product-detail.html?id=${id}`; }, 400);
+        window.location.href = `./product-detail.html?id=${id}`;
     }
 
     function filterProduct(category) {
