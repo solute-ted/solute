@@ -332,8 +332,7 @@
     const overlay = document.getElementById('loading-overlay');
 
     function handleTransition(url) {
-        overlay.classList.add('active');
-        setTimeout(() => { window.location.href = url; }, 500);
+        window.location.href = url;
     }
 
     document.querySelectorAll('nav a, .logo, .mobile-menu a').forEach(link => {
@@ -369,8 +368,6 @@
     });
 
     window.addEventListener('pageshow', () => {
-        overlay.classList.remove('active');
-        document.querySelector('.shop-container').style.opacity = '1';
         updateCartStatus();
     });
 </script>
